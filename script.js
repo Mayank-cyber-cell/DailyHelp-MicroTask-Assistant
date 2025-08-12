@@ -6,16 +6,37 @@ let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
 let notes = JSON.parse(localStorage.getItem('notes')) || [];
 let steps = JSON.parse(localStorage.getItem('steps')) || 0;
 let bmiData = JSON.parse(localStorage.getItem('bmiData')) || null;
+let isDarkMode = JSON.parse(localStorage.getItem('darkMode')) || false;
+let currentFilter = 'all';
+let currentSort = 'date';
 
 // DOM Elements
 const hamburger = document.getElementById('hamburger');
 const mobileMenu = document.getElementById('mobileMenu');
+const darkModeToggle = document.getElementById('darkModeToggle');
+const fabButton = document.getElementById('fabButton');
+const fabMenu = document.getElementById('fabMenu');
+const loadingScreen = document.getElementById('loadingScreen');
+const toast = document.getElementById('toast');
+const toastMessage = document.getElementById('toastMessage');
+const closeToast = document.getElementById('closeToast');
+const currentDate = document.getElementById('currentDate');
+const reminderCount = document.getElementById('reminderCount');
+const totalExpensesQuick = document.getElementById('totalExpensesQuick');
+const stepsCountQuick = document.getElementById('stepsCountQuick');
+const stepsPercentage = document.getElementById('stepsPercentage');
+const tourButton = document.getElementById('tourButton');
+const newTipButton = document.getElementById('newTipButton');
+const dailyTip = document.getElementById('dailyTip');
 const reminderForm = document.getElementById('reminderForm');
 const remindersList = document.getElementById('remindersList');
 const noRemindersText = document.getElementById('noRemindersText');
+const sortReminders = document.getElementById('sortReminders');
+const filterReminders = document.getElementById('filterReminders');
 const expenseForm = document.getElementById('expenseForm');
 const totalExpenses = document.getElementById('totalExpenses');
 const expenseBreakdown = document.getElementById('expenseBreakdown');
+const exportExpenses = document.getElementById('exportExpenses');
 const bmiForm = document.getElementById('bmiForm');
 const bmiResult = document.getElementById('bmiResult');
 const bmiValue = document.getElementById('bmiValue');
@@ -26,25 +47,122 @@ const goalSteps = document.getElementById('goalSteps');
 const stepsProgress = document.getElementById('stepsProgress');
 const noteForm = document.getElementById('noteForm');
 const notesList = document.getElementById('notesList');
+const searchNotes = document.getElementById('searchNotes');
+const sortNotes = document.getElementById('sortNotes');
+
+// Daily tips array
+const dailyTips = [
+    "Start your day with a glass of water and 5 minutes of deep breathing to boost your energy and focus.",
+    "Take a 10-minute walk after meals to improve digestion and maintain steady energy levels.",
+    "Practice the 20-20-20 rule: Every 20 minutes, look at something 20 feet away for 20 seconds.",
+    "Keep a gratitude journal and write down 3 things you're thankful for each day.",
+    "Set your phone to 'Do Not Disturb' mode 1 hour before bedtime for better sleep quality.",
+    "Try meal prepping on Sundays to save time and eat healthier throughout the week.",
+    "Use the Pomodoro Technique: Work for 25 minutes, then take a 5-minute break.",
+    "Stretch for 5 minutes every morning to improve flexibility and reduce stiffness.",
+    "Keep healthy snacks like nuts or fruits within easy reach to avoid junk food.",
+    "Practice mindful breathing for 2 minutes when you feel stressed or overwhelmed."
+];
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function () {
+    // Show loading screen
+    setTimeout(() => {
+        loadingScreen.style.opacity = '0';
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+        }, 500);
+    }, 1500);
+
     // Initialize the app
+    initializeApp();
     renderReminders();
     renderExpenses();
     renderNotes();
     updateStepsDisplay();
     updateBmiDisplay();
+    updateQuickStats();
+    updateCurrentDate();
+    setRandomDailyTip();
 
     // Set up intersection observer for section animations
     setupIntersectionObserver();
 
     // Smooth scroll for anchor links
     setupSmoothScroll();
+    
+    // Set up scroll progress indicator
+    setupScrollProgress();
+    
+    // Apply dark mode if enabled
+    if (isDarkMode) {
+        document.body.classList.add('dark');
+        darkModeToggle.innerHTML = '<i class="fas fa-sun text-yellow-500"></i>';
+    }
 });
 
 hamburger.addEventListener('click', function () {
     mobileMenu.classList.toggle('active');
+});
+
+// Dark mode toggle
+darkModeToggle.addEventListener('click', function () {
+    isDarkMode = !isDarkMode;
+    document.body.classList.toggle('dark');
+    
+    if (isDarkMode) {
+        this.innerHTML = '<i class="fas fa-sun text-yellow-500"></i>';
+    } else {
+        this.innerHTML = '<i class="fas fa-moon text-gray-600"></i>';
+    }
+    
+    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+    showToast('Theme updated successfully!', 'success');
+});
+
+// FAB functionality
+fabButton.addEventListener('click', function () {
+    fabMenu.classList.toggle('active');
+});
+
+// FAB menu items
+document.querySelectorAll('.fab-item').forEach(item => {
+    item.addEventListener('click', function () {
+        const action = this.getAttribute('data-action');
+        fabMenu.classList.remove('active');
+        
+        switch (action) {
+            case 'reminder':
+                document.getElementById('reminders').scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('taskName').focus();
+                break;
+            case 'expense':
+                document.getElementById('expenses').scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('expenseAmount').focus();
+                break;
+            case 'note':
+                document.getElementById('notes').scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('noteContent').focus();
+                break;
+        }
+    });
+});
+
+// Tour button
+tourButton.addEventListener('click', function () {
+    showToast('Welcome to DailyHelp! Explore each section to discover all features.', 'info');
+    // Could implement a proper tour library here
+});
+
+// New tip button
+newTipButton.addEventListener('click', function () {
+    setRandomDailyTip();
+    showToast('New tip loaded!', 'success');
+});
+
+// Toast close button
+closeToast.addEventListener('click', function () {
+    hideToast();
 });
 
 // Reminders functionality
@@ -53,22 +171,43 @@ reminderForm.addEventListener('submit', function (e) {
 
     const taskName = document.getElementById('taskName').value;
     const taskTime = document.getElementById('taskTime').value;
+    const taskPriority = document.getElementById('taskPriority').value;
     const repeat = document.querySelector('input[name="repeat"]:checked').value;
 
     const reminder = {
         id: Date.now(),
         taskName,
         taskTime,
+        priority: taskPriority,
         repeat,
-        completed: false
+        completed: false,
+        createdAt: new Date().toISOString()
     };
 
     reminders.push(reminder);
     saveReminders();
     renderReminders();
+    updateQuickStats();
 
     // Reset form
     reminderForm.reset();
+    showToast('Reminder added successfully!', 'success');
+});
+
+// Sort reminders
+sortReminders.addEventListener('click', function () {
+    currentSort = currentSort === 'date' ? 'priority' : currentSort === 'priority' ? 'name' : 'date';
+    renderReminders();
+    showToast(`Sorted by ${currentSort}`, 'info');
+});
+
+// Filter reminders
+filterReminders.addEventListener('click', function () {
+    const filters = ['all', 'high', 'medium', 'low'];
+    const currentIndex = filters.indexOf(currentFilter);
+    currentFilter = filters[(currentIndex + 1) % filters.length];
+    renderReminders();
+    showToast(`Filtered by ${currentFilter} priority`, 'info');
 });
 
 // Expenses functionality
@@ -77,20 +216,30 @@ expenseForm.addEventListener('submit', function (e) {
 
     const amount = parseFloat(document.getElementById('expenseAmount').value);
     const category = document.getElementById('expenseCategory').value;
+    const description = document.getElementById('expenseDescription').value;
 
     const expense = {
         id: Date.now(),
         amount,
         category,
+        description,
         date: new Date().toISOString()
     };
 
     expenses.push(expense);
     saveExpenses();
     renderExpenses();
+    updateQuickStats();
 
     // Reset form
     expenseForm.reset();
+    showToast('Expense added successfully!', 'success');
+});
+
+// Export expenses
+exportExpenses.addEventListener('click', function () {
+    exportExpensesToCSV();
+    showToast('Expenses exported successfully!', 'success');
 });
 
 // BMI Calculator functionality
@@ -112,6 +261,7 @@ bmiForm.addEventListener('submit', function (e) {
 
     // Show result
     bmiResult.classList.remove('hidden');
+    showToast('BMI calculated successfully!', 'success');
 });
 
 // Steps Tracker functionality
@@ -121,9 +271,11 @@ stepsForm.addEventListener('submit', function (e) {
     steps = parseInt(document.getElementById('steps').value);
     saveSteps();
     updateStepsDisplay();
+    updateQuickStats();
 
     // Reset form
     stepsForm.reset();
+    showToast('Steps updated successfully!', 'success');
 });
 
 // Notes functionality
@@ -131,10 +283,14 @@ noteForm.addEventListener('submit', function (e) {
     e.preventDefault();
 
     const content = document.getElementById('noteContent').value;
+    const title = document.getElementById('noteTitle').value;
+    const category = document.getElementById('noteCategory').value;
 
     const note = {
         id: Date.now(),
+        title: title || 'Untitled Note',
         content,
+        category,
         date: new Date().toISOString()
     };
 
@@ -144,11 +300,93 @@ noteForm.addEventListener('submit', function (e) {
 
     // Reset form
     noteForm.reset();
+    showToast('Note saved successfully!', 'success');
+});
+
+// Search notes
+searchNotes.addEventListener('click', function () {
+    const searchTerm = prompt('Enter search term:');
+    if (searchTerm) {
+        searchNotesFunction(searchTerm);
+    }
+});
+
+// Sort notes
+sortNotes.addEventListener('click', function () {
+    const sortOptions = ['date', 'title', 'category'];
+    const currentIndex = sortOptions.indexOf(currentSort);
+    currentSort = sortOptions[(currentIndex + 1) % sortOptions.length];
+    renderNotes();
+    showToast(`Sorted by ${currentSort}`, 'info');
 });
 
 // Helper functions
+function initializeApp() {
+    // Set up any initial configurations
+    console.log('DailyHelp initialized successfully!');
+}
+
+function updateCurrentDate() {
+    const now = new Date();
+    const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    };
+    currentDate.textContent = now.toLocaleDateString('en-US', options);
+}
+
+function updateQuickStats() {
+    reminderCount.textContent = reminders.length;
+    const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+    totalExpensesQuick.textContent = total.toFixed(2);
+    stepsCountQuick.textContent = steps.toLocaleString();
+}
+
+function setRandomDailyTip() {
+    const randomTip = dailyTips[Math.floor(Math.random() * dailyTips.length)];
+    dailyTip.textContent = randomTip;
+}
+
+function showToast(message, type = 'success') {
+    toastMessage.textContent = message;
+    toast.className = `fixed top-20 right-4 bg-white shadow-lg rounded-lg p-4 transform transition-transform duration-300 z-50 border-l-4 toast-${type}`;
+    toast.style.transform = 'translateX(0)';
+    
+    // Auto hide after 3 seconds
+    setTimeout(() => {
+        hideToast();
+    }, 3000);
+}
+
+function hideToast() {
+    toast.style.transform = 'translateX(100%)';
+}
+
 function renderReminders() {
-    if (reminders.length === 0) {
+    let filteredReminders = reminders;
+    
+    // Apply filter
+    if (currentFilter !== 'all') {
+        filteredReminders = reminders.filter(reminder => reminder.priority === currentFilter);
+    }
+    
+    // Apply sort
+    filteredReminders.sort((a, b) => {
+        switch (currentSort) {
+            case 'priority':
+                const priorityOrder = { high: 3, medium: 2, low: 1 };
+                return priorityOrder[b.priority] - priorityOrder[a.priority];
+            case 'name':
+                return a.taskName.localeCompare(b.taskName);
+            case 'date':
+            default:
+                return new Date(b.createdAt) - new Date(a.createdAt);
+        }
+    });
+    
+    if (filteredReminders.length === 0) {
         noRemindersText.style.display = 'block';
         remindersList.innerHTML = '';
         return;
@@ -157,32 +395,58 @@ function renderReminders() {
     noRemindersText.style.display = 'none';
     remindersList.innerHTML = '';
 
-    reminders.forEach(reminder => {
+    filteredReminders.forEach(reminder => {
         const reminderElement = document.createElement('div');
-        reminderElement.className = 'bg-gray-50 p-4 rounded-lg flex justify-between items-center';
+        reminderElement.className = `reminder-item p-6 rounded-xl flex justify-between items-center mb-4 priority-${reminder.priority} shadow-md hover:shadow-lg transition-all duration-300`;
         reminderElement.innerHTML = `
-    <div>
-        <h4 class="font-medium text-gray-800">${reminder.taskName}</h4>
-        <p class="text-sm text-gray-600">
-            <i class="far fa-clock mr-1"></i> ${formatTime(reminder.taskTime)}
-            ${reminder.repeat === 'yes' ? '<span class="ml-2"><i class="fas fa-redo mr-1"></i> Repeats</span>' : ''}
-        </p>
-    </div>
-    <button class="text-red-500 hover:text-red-700 transition" data-id="${reminder.id}">
-        <i class="fas fa-trash"></i>
-    </button>
-    `;
+            <div class="flex-1">
+                <div class="flex items-center mb-2">
+                    <h4 class="font-semibold text-gray-800 text-lg">${reminder.taskName}</h4>
+                    <span class="ml-3 px-3 py-1 text-xs font-medium rounded-full ${getPriorityColor(reminder.priority)}">${reminder.priority.toUpperCase()}</span>
+                </div>
+                <div class="flex items-center text-sm text-gray-600 space-x-4">
+                    <span><i class="far fa-clock mr-1"></i> ${formatTime(reminder.taskTime)}</span>
+                    ${reminder.repeat !== 'no' ? `<span><i class="fas fa-redo mr-1"></i> ${reminder.repeat}</span>` : ''}
+                    <span><i class="fas fa-calendar mr-1"></i> ${formatDate(reminder.createdAt)}</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button class="complete-reminder p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-all duration-300" data-id="${reminder.id}">
+                    <i class="fas fa-check"></i>
+                </button>
+                <button class="delete-reminder p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-300" data-id="${reminder.id}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
 
         remindersList.appendChild(reminderElement);
     });
 
     // Add event listeners to delete buttons
-    document.querySelectorAll('#remindersList button').forEach(button => {
+    document.querySelectorAll('.delete-reminder').forEach(button => {
         button.addEventListener('click', function () {
             const id = parseInt(this.getAttribute('data-id'));
             deleteReminder(id);
         });
     });
+    
+    // Add event listeners to complete buttons
+    document.querySelectorAll('.complete-reminder').forEach(button => {
+        button.addEventListener('click', function () {
+            const id = parseInt(this.getAttribute('data-id'));
+            completeReminder(id);
+        });
+    });
+}
+
+function getPriorityColor(priority) {
+    switch (priority) {
+        case 'high': return 'bg-red-100 text-red-800';
+        case 'medium': return 'bg-yellow-100 text-yellow-800';
+        case 'low': return 'bg-green-100 text-green-800';
+        default: return 'bg-gray-100 text-gray-800';
+    }
 }
 
 function renderExpenses() {
@@ -201,7 +465,15 @@ function renderExpenses() {
 
     // Render breakdown
     if (Object.keys(categories).length === 0) {
-        expenseBreakdown.innerHTML = '<p class="text-gray-500 text-center py-4">No expenses recorded yet. Add your first expense to see the breakdown.</p>';
+        expenseBreakdown.innerHTML = `
+            <div class="text-center py-12">
+                <div class="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-chart-pie text-gray-400 text-2xl"></i>
+                </div>
+                <p class="text-gray-500 text-lg mb-2">No expenses yet</p>
+                <p class="text-gray-400 text-sm">Add your first expense to see the breakdown.</p>
+            </div>
+        `;
         return;
     }
 
@@ -209,50 +481,103 @@ function renderExpenses() {
 
     for (const category in categories) {
         const percentage = (categories[category] / total) * 100;
+        const categoryExpenses = expenses.filter(expense => expense.category === category);
 
         const categoryElement = document.createElement('div');
-        categoryElement.className = 'flex justify-between items-center';
+        categoryElement.className = 'expense-item';
         categoryElement.innerHTML = `
-    <div class="flex items-center">
-        <div class="w-3 h-3 rounded-full bg-purple-600 mr-2"></div>
-        <span class="font-medium">${category}</span>
-    </div>
-    <div class="text-right">
-        <p class="font-medium">$${categories[category].toFixed(2)}</p>
-        <p class="text-sm text-gray-500">${percentage.toFixed(1)}%</p>
-    </div>
-    `;
+            <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center">
+                    <div class="w-4 h-4 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 mr-3"></div>
+                    <span class="font-semibold text-gray-800">${category}</span>
+                </div>
+                <div class="text-right">
+                    <p class="font-bold text-blue-600">$${categories[category].toFixed(2)}</p>
+                    <p class="text-sm text-gray-500">${percentage.toFixed(1)}%</p>
+                </div>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 h-2 rounded-full transition-all duration-500" style="width: ${percentage}%"></div>
+            </div>
+            <p class="text-xs text-gray-500">${categoryExpenses.length} transaction${categoryExpenses.length !== 1 ? 's' : ''}</p>
+        `;
 
         expenseBreakdown.appendChild(categoryElement);
     }
 }
 
+function exportExpensesToCSV() {
+    const csvContent = "data:text/csv;charset=utf-8," 
+        + "Date,Category,Amount,Description\n"
+        + expenses.map(expense => 
+            `${new Date(expense.date).toLocaleDateString()},${expense.category},${expense.amount},"${expense.description || ''}"`
+        ).join("\n");
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "expenses.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 function renderNotes() {
-    if (notes.length === 0) {
-        notesList.innerHTML = '<p class="text-gray-500 text-center py-4 col-span-2">No notes saved yet. Add your first note above!</p>';
+    let sortedNotes = [...notes];
+    
+    // Apply sort
+    sortedNotes.sort((a, b) => {
+        switch (currentSort) {
+            case 'title':
+                return a.title.localeCompare(b.title);
+            case 'category':
+                return a.category.localeCompare(b.category);
+            case 'date':
+            default:
+                return new Date(b.date) - new Date(a.date);
+        }
+    });
+    
+    if (sortedNotes.length === 0) {
+        notesList.innerHTML = `
+            <div class="text-center py-12 col-span-2">
+                <div class="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-sticky-note text-gray-400 text-2xl"></i>
+                </div>
+                <p class="text-gray-500 text-lg mb-2">No notes yet</p>
+                <p class="text-gray-400 text-sm">Create your first note above to get started!</p>
+            </div>
+        `;
         return;
     }
 
     notesList.innerHTML = '';
 
-    notes.forEach(note => {
+    sortedNotes.forEach(note => {
         const noteElement = document.createElement('div');
-        noteElement.className = 'bg-white rounded-lg shadow p-4 hover:shadow-md transition';
+        noteElement.className = 'note-item bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all duration-300 border border-yellow-100';
         noteElement.innerHTML = `
-    <div class="flex justify-between items-start mb-2">
-        <p class="text-gray-700">${note.content}</p>
-        <button class="text-red-500 hover:text-red-700 transition" data-id="${note.id}">
-            <i class="fas fa-trash"></i>
-        </button>
-    </div>
-    <p class="text-xs text-gray-500">${formatDate(note.date)}</p>
-    `;
+            <div class="flex justify-between items-start mb-4">
+                <div class="flex-1">
+                    <h4 class="font-semibold text-gray-800 text-lg mb-2">${note.title}</h4>
+                    <span class="category-badge">${getCategoryIcon(note.category)} ${note.category}</span>
+                </div>
+                <button class="delete-note p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-300" data-id="${note.id}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <p class="text-gray-700 mb-4 leading-relaxed">${note.content}</p>
+            <div class="flex justify-between items-center text-xs text-gray-500">
+                <span><i class="fas fa-calendar mr-1"></i> ${formatDate(note.date)}</span>
+                <span>${note.content.length} characters</span>
+            </div>
+        `;
 
         notesList.appendChild(noteElement);
     });
 
     // Add event listeners to delete buttons
-    document.querySelectorAll('#notesList button').forEach(button => {
+    document.querySelectorAll('.delete-note').forEach(button => {
         button.addEventListener('click', function () {
             const id = parseInt(this.getAttribute('data-id'));
             deleteNote(id);
@@ -260,10 +585,59 @@ function renderNotes() {
     });
 }
 
+function getCategoryIcon(category) {
+    const icons = {
+        general: '📝',
+        work: '💼',
+        personal: '👤',
+        ideas: '💡',
+        shopping: '🛒',
+        goals: '🎯'
+    };
+    return icons[category] || '📝';
+}
+
+function searchNotesFunction(searchTerm) {
+    const filteredNotes = notes.filter(note => 
+        note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        note.category.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    
+    if (filteredNotes.length === 0) {
+        showToast('No notes found matching your search.', 'warning');
+        return;
+    }
+    
+    // Temporarily render filtered notes
+    const originalNotes = [...notes];
+    notes = filteredNotes;
+    renderNotes();
+    
+    // Restore original notes after 5 seconds
+    setTimeout(() => {
+        notes = originalNotes;
+        renderNotes();
+        showToast('Search cleared. Showing all notes.', 'info');
+    }, 5000);
+    
+    showToast(`Found ${filteredNotes.length} note(s) matching "${searchTerm}"`, 'success');
+}
+
 function updateStepsDisplay() {
     currentSteps.textContent = steps;
-    const progress = (steps / 10000) * 100;
+    const goalStepsValue = 10000;
+    const progress = (steps / goalStepsValue) * 100;
+    const percentage = Math.min(progress, 100);
+    
+    stepsPercentage.textContent = Math.round(percentage);
     stepsProgress.style.width = `${Math.min(progress, 100)}%`;
+    
+    // Add celebration effect if goal is reached
+    if (steps >= goalStepsValue && steps > 0) {
+        stepsProgress.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+        showToast('🎉 Congratulations! You reached your daily step goal!', 'success');
+    }
 }
 
 function updateBmiDisplay() {
@@ -273,13 +647,13 @@ function updateBmiDisplay() {
 
         // Set color based on BMI category
         if (bmiData.category.includes('Underweight')) {
-            bmiValue.className = 'text-2xl font-bold mb-2 text-blue-600';
+            bmiValue.className = 'text-3xl font-bold mb-1 text-blue-600';
         } else if (bmiData.category.includes('Normal')) {
-            bmiValue.className = 'text-2xl font-bold mb-2 text-green-600';
+            bmiValue.className = 'text-3xl font-bold mb-1 text-green-600';
         } else if (bmiData.category.includes('Overweight')) {
-            bmiValue.className = 'text-2xl font-bold mb-2 text-yellow-600';
+            bmiValue.className = 'text-3xl font-bold mb-1 text-yellow-600';
         } else {
-            bmiValue.className = 'text-2xl font-bold mb-2 text-red-600';
+            bmiValue.className = 'text-3xl font-bold mb-1 text-red-600';
         }
 
         bmiResult.classList.remove('hidden');
@@ -294,15 +668,34 @@ function getBmiCategory(bmi) {
 }
 
 function deleteReminder(id) {
-    reminders = reminders.filter(reminder => reminder.id !== id);
-    saveReminders();
-    renderReminders();
+    if (confirm('Are you sure you want to delete this reminder?')) {
+        reminders = reminders.filter(reminder => reminder.id !== id);
+        saveReminders();
+        renderReminders();
+        updateQuickStats();
+        showToast('Reminder deleted successfully!', 'success');
+    }
+}
+
+function completeReminder(id) {
+    const reminder = reminders.find(r => r.id === id);
+    if (reminder) {
+        if (reminder.repeat === 'no') {
+            deleteReminder(id);
+            showToast('Reminder completed and removed!', 'success');
+        } else {
+            showToast('Recurring reminder completed! It will repeat as scheduled.', 'info');
+        }
+    }
 }
 
 function deleteNote(id) {
-    notes = notes.filter(note => note.id !== id);
-    saveNotes();
-    renderNotes();
+    if (confirm('Are you sure you want to delete this note?')) {
+        notes = notes.filter(note => note.id !== id);
+        saveNotes();
+        renderNotes();
+        showToast('Note deleted successfully!', 'success');
+    }
 }
 
 function formatTime(timeString) {
@@ -314,6 +707,8 @@ function formatTime(timeString) {
         period = 'PM';
         if (hour > 12) hour -= 12;
     }
+    
+    if (hour === 0) hour = 12;
 
     return `${hour}:${minutes} ${period}`;
 }
@@ -321,11 +716,9 @@ function formatTime(timeString) {
 function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
-        year: 'numeric',
         month: 'short',
         day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+        year: 'numeric'
     });
 }
 
@@ -358,6 +751,15 @@ function setupIntersectionObserver() {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
+                
+                // Update active nav link
+                const id = entry.target.getAttribute('id');
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${id}`) {
+                        link.classList.add('active');
+                    }
+                });
             }
         });
     }, {
@@ -366,6 +768,24 @@ function setupIntersectionObserver() {
 
     sections.forEach(section => {
         observer.observe(section);
+    });
+}
+
+function setupScrollProgress() {
+    const progressBar = document.querySelector('.progress-indicator');
+    
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.pageYOffset;
+        const docHeight = document.body.offsetHeight - window.innerHeight;
+        const scrollPercent = scrollTop / docHeight;
+        
+        progressBar.style.transform = `scaleX(${scrollPercent})`;
+        
+        if (scrollPercent > 0.1) {
+            progressBar.classList.add('active');
+        } else {
+            progressBar.classList.remove('active');
+        }
     });
 }
 
@@ -379,13 +799,63 @@ function setupSmoothScroll() {
 
             if (targetElement) {
                 window.scrollTo({
-                    top: targetElement.offsetTop - 70,
+                    top: targetElement.offsetTop - 100,
                     behavior: 'smooth'
                 });
 
                 // Close mobile menu if open
                 mobileMenu.classList.remove('active');
+                
+                // Close FAB menu if open
+                fabMenu.classList.remove('active');
             }
         });
     });
 }
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + K for quick actions
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        fabButton.click();
+    }
+    
+    // Escape to close modals/menus
+    if (e.key === 'Escape') {
+        mobileMenu.classList.remove('active');
+        fabMenu.classList.remove('active');
+        hideToast();
+    }
+});
+
+// Auto-save functionality
+let autoSaveTimer;
+function scheduleAutoSave() {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => {
+        // Auto-save any unsaved changes
+        console.log('Auto-save triggered');
+    }, 30000); // 30 seconds
+}
+
+// Service Worker registration for offline functionality
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then(registration => {
+                console.log('SW registered: ', registration);
+            })
+            .catch(registrationError => {
+                console.log('SW registration failed: ', registrationError);
+            });
+    });
+}
+
+// Performance monitoring
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        const perfData = performance.getEntriesByType('navigation')[0];
+        console.log('Page load time:', perfData.loadEventEnd - perfData.loadEventStart, 'ms');
+    }, 0);
+});

@@ -5,69 +5,204 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DailyHelp: Micro Task Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'bounce-in': 'bounceIn 0.6s ease-out',
+                        'pulse-slow': 'pulse 3s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        bounceIn: {
+                            '0%': { transform: 'scale(0.3)', opacity: '0' },
+                            '50%': { transform: 'scale(1.05)' },
+                            '70%': { transform: 'scale(0.9)' },
+                            '100%': { transform: 'scale(1)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-50 font-sans">
+<body class="bg-gradient-to-br from-gray-50 to-blue-50 font-sans">
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center z-50">
+        <div class="text-center text-white">
+            <div class="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent mx-auto mb-4"></div>
+            <h2 class="text-2xl font-bold">DailyHelp</h2>
+            <p class="text-purple-200">Loading your daily assistant...</p>
+        </div>
+    </div>
+
     <!-- Header/Navbar -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
+    <header class="bg-white/90 backdrop-blur-md shadow-lg sticky top-0 z-40 border-b border-purple-100">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center">
-                <i class="fas fa-tasks text-purple-600 text-2xl mr-2"></i>
-                <h1 class="text-xl font-bold text-purple-600">DailyHelp</h1>
+                <div class="bg-gradient-to-r from-purple-600 to-blue-600 p-2 rounded-lg mr-3">
+                    <i class="fas fa-tasks text-white text-xl"></i>
+                </div>
+                <h1 class="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">DailyHelp</h1>
             </div>
             
             <nav class="hidden md:flex space-x-6">
-                <a href="#home" class="text-gray-700 hover:text-purple-600 transition">Home</a>
-                <a href="#reminders" class="text-gray-700 hover:text-purple-600 transition">Reminders</a>
-                <a href="#expenses" class="text-gray-700 hover:text-purple-600 transition">Expenses</a>
-                <a href="#health" class="text-gray-700 hover:text-purple-600 transition">Health</a>
-                <a href="#notes" class="text-gray-700 hover:text-purple-600 transition">Notes</a>
-                <a href="#tips" class="text-gray-700 hover:text-purple-600 transition">Tips</a>
+                <a href="#home" class="nav-link text-gray-700 hover:text-purple-600 transition-all duration-300 px-3 py-2 rounded-lg hover:bg-purple-50">Home</a>
+                <a href="#reminders" class="nav-link text-gray-700 hover:text-purple-600 transition-all duration-300 px-3 py-2 rounded-lg hover:bg-purple-50">Reminders</a>
+                <a href="#expenses" class="nav-link text-gray-700 hover:text-purple-600 transition-all duration-300 px-3 py-2 rounded-lg hover:bg-purple-50">Expenses</a>
+                <a href="#health" class="nav-link text-gray-700 hover:text-purple-600 transition-all duration-300 px-3 py-2 rounded-lg hover:bg-purple-50">Health</a>
+                <a href="#notes" class="nav-link text-gray-700 hover:text-purple-600 transition-all duration-300 px-3 py-2 rounded-lg hover:bg-purple-50">Notes</a>
+                <a href="#tips" class="nav-link text-gray-700 hover:text-purple-600 transition-all duration-300 px-3 py-2 rounded-lg hover:bg-purple-50">Tips</a>
             </nav>
             
-            <button class="hamburger-menu md:hidden text-gray-700" id="hamburger">
-                <i class="fas fa-bars text-2xl"></i>
-            </button>
+            <div class="flex items-center space-x-4">
+                <!-- Dark Mode Toggle -->
+                <button id="darkModeToggle" class="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-300">
+                    <i class="fas fa-moon text-gray-600"></i>
+                </button>
+                
+                <button class="hamburger-menu md:hidden text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors" id="hamburger">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
         </div>
         
-        <div class="mobile-menu container mx-auto px-4 py-2" id="mobileMenu">
-            <a href="#home" class="block py-2 text-gray-700 hover:text-purple-600 transition">Home</a>
-            <a href="#reminders" class="block py-2 text-gray-700 hover:text-purple-600 transition">Reminders</a>
-            <a href="#expenses" class="block py-2 text-gray-700 hover:text-purple-600 transition">Expenses</a>
-            <a href="#health" class="block py-2 text-gray-700 hover:text-purple-600 transition">Health</a>
-            <a href="#notes" class="block py-2 text-gray-700 hover:text-purple-600 transition">Notes</a>
-            <a href="#tips" class="block py-2 text-gray-700 hover:text-purple-600 transition">Tips</a>
+        <!-- Progress Bar -->
+        <div class="progress-indicator h-1 bg-gradient-to-r from-purple-600 to-blue-600 transform scale-x-0 origin-left transition-transform duration-300"></div>
+        
+        <div class="mobile-menu container mx-auto px-4 py-2 bg-white/95 backdrop-blur-md" id="mobileMenu">
+            <a href="#home" class="block py-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:bg-purple-50 rounded-lg px-3">
+                <i class="fas fa-home mr-2"></i>Home
+            </a>
+            <a href="#reminders" class="block py-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:bg-purple-50 rounded-lg px-3">
+                <i class="fas fa-bell mr-2"></i>Reminders
+            </a>
+            <a href="#expenses" class="block py-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:bg-purple-50 rounded-lg px-3">
+                <i class="fas fa-wallet mr-2"></i>Expenses
+            </a>
+            <a href="#health" class="block py-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:bg-purple-50 rounded-lg px-3">
+                <i class="fas fa-heartbeat mr-2"></i>Health
+            </a>
+            <a href="#notes" class="block py-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:bg-purple-50 rounded-lg px-3">
+                <i class="fas fa-sticky-note mr-2"></i>Notes
+            </a>
+            <a href="#tips" class="block py-3 text-gray-700 hover:text-purple-600 transition-all duration-300 hover:bg-purple-50 rounded-lg px-3">
+                <i class="fas fa-lightbulb mr-2"></i>Tips
+            </a>
         </div>
     </header>
 
+    <!-- Floating Action Button -->
+    <div class="fixed bottom-6 right-6 z-30">
+        <button id="fabButton" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300">
+            <i class="fas fa-plus text-xl"></i>
+        </button>
+        
+        <!-- FAB Menu -->
+        <div id="fabMenu" class="absolute bottom-16 right-0 space-y-3 opacity-0 pointer-events-none transition-all duration-300">
+            <button class="fab-item bg-purple-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300" data-action="reminder">
+                <i class="fas fa-bell"></i>
+            </button>
+            <button class="fab-item bg-blue-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300" data-action="expense">
+                <i class="fas fa-wallet"></i>
+            </button>
+            <button class="fab-item bg-green-600 text-white p-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300" data-action="note">
+                <i class="fas fa-sticky-note"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Stats Bar -->
+    <div class="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center text-sm">
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center text-purple-600">
+                        <i class="fas fa-bell mr-1"></i>
+                        <span id="reminderCount">0</span> reminders
+                    </div>
+                    <div class="flex items-center text-blue-600">
+                        <i class="fas fa-wallet mr-1"></i>
+                        $<span id="totalExpensesQuick">0.00</span> spent
+                    </div>
+                    <div class="flex items-center text-green-600">
+                        <i class="fas fa-shoe-prints mr-1"></i>
+                        <span id="stepsCountQuick">0</span> steps
+                    </div>
+                </div>
+                <div class="text-gray-500">
+                    <i class="fas fa-calendar mr-1"></i>
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Hero Section -->
-    <section id="home" class="py-16 md:py-24 bg-gradient-to-r from-purple-50 to-blue-50">
+    <section id="home" class="py-16 md:py-24 bg-gradient-to-br from-purple-100 via-blue-50 to-indigo-100 relative overflow-hidden">
+        <!-- Background Animation -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="floating-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
+        </div>
+        
         <div class="container mx-auto px-4 flex flex-col md:flex-row items-center">
             <div class="md:w-1/2 mb-10 md:mb-0">
-                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">DailyHelp</h1>
-                <p class="text-xl text-gray-600 mb-8">Your daily tasks, all in one place.</p>
-                <a href="#reminders" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-full font-medium transition shadow-md hover:shadow-lg">
-                    Get Started <i class="fas fa-arrow-down ml-2"></i>
-                </a>
+                <div class="animate-fade-in">
+                    <h1 class="text-5xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent mb-6 leading-tight">
+                        DailyHelp
+                    </h1>
+                    <p class="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed">
+                        Your intelligent daily companion for 
+                        <span class="text-purple-600 font-semibold">productivity</span> and 
+                        <span class="text-blue-600 font-semibold">wellness</span>
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="#reminders" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 rounded-full font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 text-center">
+                            Get Started <i class="fas fa-rocket ml-2"></i>
+                        </a>
+                        <button id="tourButton" class="border-2 border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white px-8 py-4 rounded-full font-medium transition-all duration-300 text-center">
+                            Take a Tour <i class="fas fa-play ml-2"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
             <div class="md:w-1/2 flex justify-center">
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col items-center">
+                <div class="grid grid-cols-2 gap-6 animate-bounce-in">
+                    <div class="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl hover:shadow-2xl flex flex-col items-center transition-all duration-300 transform hover:scale-105 border border-purple-100">
                         <i class="fas fa-bell text-purple-600 text-3xl mb-3"></i>
-                        <p class="text-gray-700">Reminders</p>
+                        <p class="text-gray-700 font-medium">Smart Reminders</p>
+                        <p class="text-xs text-gray-500 mt-1 text-center">Never miss important tasks</p>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col items-center">
+                    <div class="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl hover:shadow-2xl flex flex-col items-center transition-all duration-300 transform hover:scale-105 border border-blue-100">
                         <i class="fas fa-wallet text-blue-600 text-3xl mb-3"></i>
-                        <p class="text-gray-700">Expenses</p>
+                        <p class="text-gray-700 font-medium">Expense Tracker</p>
+                        <p class="text-xs text-gray-500 mt-1 text-center">Monitor your spending</p>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col items-center">
+                    <div class="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl hover:shadow-2xl flex flex-col items-center transition-all duration-300 transform hover:scale-105 border border-green-100">
                         <i class="fas fa-heartbeat text-green-600 text-3xl mb-3"></i>
-                        <p class="text-gray-700">Health</p>
+                        <p class="text-gray-700 font-medium">Health Monitor</p>
+                        <p class="text-xs text-gray-500 mt-1 text-center">Track your wellness</p>
                     </div>
-                    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col items-center">
+                    <div class="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl hover:shadow-2xl flex flex-col items-center transition-all duration-300 transform hover:scale-105 border border-yellow-100">
                         <i class="fas fa-sticky-note text-yellow-600 text-3xl mb-3"></i>
-                        <p class="text-gray-700">Notes</p>
+                        <p class="text-gray-700 font-medium">Quick Notes</p>
+                        <p class="text-xs text-gray-500 mt-1 text-center">Capture your thoughts</p>
                     </div>
                 </div>
             </div>
@@ -77,99 +212,179 @@
     <!-- Reminders Section -->
     <section id="reminders" class="py-16 container mx-auto px-4">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">Reminders</h2>
-            <p class="text-gray-600 max-w-2xl mx-auto">Never miss an important task again with our simple reminder system.</p>
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full mb-4">
+                <i class="fas fa-bell text-white text-2xl"></i>
+            </div>
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">Smart Reminders</h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">Never miss an important task again with our intelligent reminder system.</p>
         </div>
         
-        <div class="bg-white rounded-xl shadow-md p-6 max-w-2xl mx-auto mb-8">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">Add New Reminder</h3>
+        <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8 max-w-2xl mx-auto mb-8 border border-purple-100">
+            <div class="flex items-center mb-6">
+                <div class="bg-gradient-to-r from-purple-600 to-blue-600 p-2 rounded-lg mr-3">
+                    <i class="fas fa-plus text-white"></i>
+                </div>
+                <h3 class="text-2xl font-semibold text-gray-800">Add New Reminder</h3>
+            </div>
             <form id="reminderForm" class="space-y-4">
                 <div>
-                    <label for="taskName" class="block text-gray-700 mb-2">Task Name</label>
-                    <input type="text" id="taskName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" required>
+                    <label for="taskName" class="block text-gray-700 mb-2 font-medium">Task Name</label>
+                    <input type="text" id="taskName" placeholder="Enter your task..." class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-300 bg-gray-50 focus:bg-white" required>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="taskTime" class="block text-gray-700 mb-2 font-medium">Time</label>
+                        <input type="time" id="taskTime" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-300 bg-gray-50 focus:bg-white" required>
+                    </div>
+                    
+                    <div>
+                        <label for="taskPriority" class="block text-gray-700 mb-2 font-medium">Priority</label>
+                        <select id="taskPriority" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-300 bg-gray-50 focus:bg-white">
+                            <option value="low">Low Priority</option>
+                            <option value="medium" selected>Medium Priority</option>
+                            <option value="high">High Priority</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div>
-                    <label for="taskTime" class="block text-gray-700 mb-2">Time</label>
-                    <input type="time" id="taskTime" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" required>
-                </div>
-                
-                <div>
-                    <label class="block text-gray-700 mb-2">Repeat</label>
-                    <div class="flex space-x-4">
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="repeat" value="yes" class="text-purple-600 focus:ring-purple-600">
-                            <span class="ml-2">Yes</span>
-                        </label>
-                        <label class="inline-flex items-center">
+                    <label class="block text-gray-700 mb-3 font-medium">Repeat Options</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <label class="inline-flex items-center p-3 border border-gray-300 rounded-xl hover:bg-purple-50 cursor-pointer transition-all duration-300">
                             <input type="radio" name="repeat" value="no" checked class="text-purple-600 focus:ring-purple-600">
-                            <span class="ml-2">No</span>
+                            <span class="ml-2 text-sm">No Repeat</span>
+                        </label>
+                        <label class="inline-flex items-center p-3 border border-gray-300 rounded-xl hover:bg-purple-50 cursor-pointer transition-all duration-300">
+                            <input type="radio" name="repeat" value="daily" class="text-purple-600 focus:ring-purple-600">
+                            <span class="ml-2 text-sm">Daily</span>
+                        </label>
+                        <label class="inline-flex items-center p-3 border border-gray-300 rounded-xl hover:bg-purple-50 cursor-pointer transition-all duration-300">
+                            <input type="radio" name="repeat" value="weekly" class="text-purple-600 focus:ring-purple-600">
+                            <span class="ml-2 text-sm">Weekly</span>
+                        </label>
+                        <label class="inline-flex items-center p-3 border border-gray-300 rounded-xl hover:bg-purple-50 cursor-pointer transition-all duration-300">
+                            <input type="radio" name="repeat" value="monthly" class="text-purple-600 focus:ring-purple-600">
+                            <span class="ml-2 text-sm">Monthly</span>
                         </label>
                     </div>
                 </div>
                 
-                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition w-full">
+                <button type="submit" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-4 rounded-xl font-medium transition-all duration-300 w-full shadow-lg hover:shadow-xl transform hover:scale-105">
                     <i class="fas fa-plus mr-2"></i> Add Reminder
                 </button>
             </form>
         </div>
         
-        <div class="bg-white rounded-xl shadow-md p-6 max-w-2xl mx-auto">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">Your Reminders</h3>
+        <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8 max-w-2xl mx-auto border border-purple-100">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center">
+                    <div class="bg-gradient-to-r from-purple-600 to-blue-600 p-2 rounded-lg mr-3">
+                        <i class="fas fa-list text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-gray-800">Your Reminders</h3>
+                </div>
+                <div class="flex space-x-2">
+                    <button id="sortReminders" class="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-300">
+                        <i class="fas fa-sort"></i>
+                    </button>
+                    <button id="filterReminders" class="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-300">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                </div>
+            </div>
             <div id="remindersList" class="space-y-3">
                 <!-- Reminders will be added here dynamically -->
-                <p class="text-gray-500 text-center py-4" id="noRemindersText">No reminders added yet. Add your first reminder above!</p>
+                <div class="text-center py-12" id="noRemindersText">
+                    <div class="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-bell-slash text-gray-400 text-2xl"></i>
+                    </div>
+                    <p class="text-gray-500 text-lg mb-2">No reminders yet</p>
+                    <p class="text-gray-400 text-sm">Add your first reminder above to get started!</p>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Expenses Section -->
-    <section id="expenses" class="py-16 bg-gray-50">
+    <section id="expenses" class="py-16 bg-gradient-to-br from-blue-50 to-indigo-50">
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-800 mb-2">Expenses Tracker</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">Keep track of your spending and manage your budget effectively.</p>
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full mb-4">
+                    <i class="fas fa-wallet text-white text-2xl"></i>
+                </div>
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Smart Expense Tracker</h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Keep track of your spending and manage your budget with intelligent insights.</p>
             </div>
             
             <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                <div class="bg-white rounded-xl shadow-md p-6">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Add New Expense</h3>
+                <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8 border border-blue-100">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-lg mr-3">
+                            <i class="fas fa-plus text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-gray-800">Add New Expense</h3>
+                    </div>
                     <form id="expenseForm" class="space-y-4">
                         <div>
-                            <label for="expenseAmount" class="block text-gray-700 mb-2">Amount ($)</label>
-                            <input type="number" id="expenseAmount" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" required>
+                            <label for="expenseAmount" class="block text-gray-700 mb-2 font-medium">Amount ($)</label>
+                            <input type="number" id="expenseAmount" step="0.01" min="0" placeholder="0.00" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all duration-300 bg-gray-50 focus:bg-white" required>
                         </div>
                         
                         <div>
-                            <label for="expenseCategory" class="block text-gray-700 mb-2">Category</label>
-                            <select id="expenseCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" required>
+                            <label for="expenseCategory" class="block text-gray-700 mb-2 font-medium">Category</label>
+                            <select id="expenseCategory" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all duration-300 bg-gray-50 focus:bg-white" required>
                                 <option value="">Select a category</option>
-                                <option value="Food">Food</option>
-                                <option value="Transportation">Transportation</option>
-                                <option value="Entertainment">Entertainment</option>
-                                <option value="Utilities">Utilities</option>
-                                <option value="Shopping">Shopping</option>
-                                <option value="Health">Health</option>
+                                <option value="Food">🍔 Food & Dining</option>
+                                <option value="Transportation">🚗 Transportation</option>
+                                <option value="Entertainment">🎬 Entertainment</option>
+                                <option value="Utilities">⚡ Utilities</option>
+                                <option value="Shopping">🛍️ Shopping</option>
+                                <option value="Health">🏥 Health & Medical</option>
+                                <option value="Education">📚 Education</option>
+                                <option value="Travel">✈️ Travel</option>
                                 <option value="Other">Other</option>
                             </select>
                         </div>
                         
-                        <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition w-full">
+                        <div>
+                            <label for="expenseDescription" class="block text-gray-700 mb-2 font-medium">Description (Optional)</label>
+                            <input type="text" id="expenseDescription" placeholder="What was this expense for?" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all duration-300 bg-gray-50 focus:bg-white">
+                        </div>
+                        
+                        <button type="submit" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-4 rounded-xl font-medium transition-all duration-300 w-full shadow-lg hover:shadow-xl transform hover:scale-105">
                             <i class="fas fa-plus mr-2"></i> Add Expense
                         </button>
                     </form>
                     
-                    <div class="mt-8">
+                    <div class="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
                         <h4 class="text-lg font-semibold text-gray-800 mb-2">Total Expenses</h4>
-                        <p class="text-2xl font-bold text-purple-600" id="totalExpenses">$0.00</p>
+                        <p class="text-3xl font-bold text-blue-600" id="totalExpenses">$0.00</p>
+                        <p class="text-sm text-gray-600 mt-1">This month</p>
                     </div>
                 </div>
                 
-                <div class="bg-white rounded-xl shadow-md p-6">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Expense Breakdown</h3>
+                <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8 border border-blue-100">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-lg mr-3">
+                                <i class="fas fa-chart-pie text-white"></i>
+                            </div>
+                            <h3 class="text-2xl font-semibold text-gray-800">Expense Breakdown</h3>
+                        </div>
+                        <button id="exportExpenses" class="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-300">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
                     <div id="expenseBreakdown" class="space-y-4">
                         <!-- Expense breakdown will be added here dynamically -->
-                        <p class="text-gray-500 text-center py-4">No expenses recorded yet. Add your first expense to see the breakdown.</p>
+                        <div class="text-center py-12">
+                            <div class="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-chart-pie text-gray-400 text-2xl"></i>
+                            </div>
+                            <p class="text-gray-500 text-lg mb-2">No expenses yet</p>
+                            <p class="text-gray-400 text-sm">Add your first expense to see the breakdown.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -179,54 +394,83 @@
     <!-- Health Section -->
     <section id="health" class="py-16 container mx-auto px-4">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">Health Tracker</h2>
-            <p class="text-gray-600 max-w-2xl mx-auto">Monitor your health metrics and stay on top of your wellness goals.</p>
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-600 to-teal-600 rounded-full mb-4">
+                <i class="fas fa-heartbeat text-white text-2xl"></i>
+            </div>
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">Health & Wellness</h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">Monitor your health metrics and stay on top of your wellness goals with smart tracking.</p>
         </div>
         
         <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <div class="bg-white rounded-xl shadow-md p-6">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">BMI Calculator</h3>
+            <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8 border border-green-100">
+                <div class="flex items-center mb-6">
+                    <div class="bg-gradient-to-r from-green-600 to-teal-600 p-2 rounded-lg mr-3">
+                        <i class="fas fa-calculator text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-gray-800">BMI Calculator</h3>
+                </div>
                 <form id="bmiForm" class="space-y-4">
                     <div>
-                        <label for="height" class="block text-gray-700 mb-2">Height (cm)</label>
-                        <input type="number" id="height" min="100" max="250" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" required>
+                        <label for="height" class="block text-gray-700 mb-2 font-medium">Height (cm)</label>
+                        <input type="number" id="height" min="100" max="250" placeholder="170" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all duration-300 bg-gray-50 focus:bg-white" required>
                     </div>
                     
                     <div>
-                        <label for="weight" class="block text-gray-700 mb-2">Weight (kg)</label>
-                        <input type="number" id="weight" min="30" max="300" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" required>
+                        <label for="weight" class="block text-gray-700 mb-2 font-medium">Weight (kg)</label>
+                        <input type="number" id="weight" min="30" max="300" placeholder="70" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all duration-300 bg-gray-50 focus:bg-white" required>
                     </div>
                     
-                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition w-full">
+                    <button type="submit" class="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white px-6 py-4 rounded-xl font-medium transition-all duration-300 w-full shadow-lg hover:shadow-xl transform hover:scale-105">
                         <i class="fas fa-calculator mr-2"></i> Calculate BMI
                     </button>
                 </form>
                 
-                <div id="bmiResult" class="mt-6 hidden">
-                    <h4 class="text-lg font-semibold text-gray-800 mb-2">Your BMI Result</h4>
-                    <p class="text-2xl font-bold mb-2" id="bmiValue">0.0</p>
-                    <p class="text-gray-700" id="bmiCategory">Category will appear here</p>
+                <div id="bmiResult" class="mt-8 p-6 bg-gradient-to-r from-green-50 to-teal-50 rounded-xl hidden">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-3">Your BMI Result</h4>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-3xl font-bold mb-1" id="bmiValue">0.0</p>
+                            <p class="text-gray-700 text-sm" id="bmiCategory">Category will appear here</p>
+                        </div>
+                        <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center">
+                            <i class="fas fa-heartbeat text-green-600 text-2xl"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <div class="bg-white rounded-xl shadow-md p-6">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Steps Tracker</h3>
+            <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8 border border-green-100">
+                <div class="flex items-center mb-6">
+                    <div class="bg-gradient-to-r from-green-600 to-teal-600 p-2 rounded-lg mr-3">
+                        <i class="fas fa-shoe-prints text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-gray-800">Steps Tracker</h3>
+                </div>
                 <form id="stepsForm" class="space-y-4">
                     <div>
-                        <label for="steps" class="block text-gray-700 mb-2">Today's Steps</label>
-                        <input type="number" id="steps" min="0" max="50000" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" required>
+                        <label for="steps" class="block text-gray-700 mb-2 font-medium">Today's Steps</label>
+                        <input type="number" id="steps" min="0" max="50000" placeholder="8000" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all duration-300 bg-gray-50 focus:bg-white" required>
                     </div>
                     
-                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition w-full">
+                    <button type="submit" class="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white px-6 py-4 rounded-xl font-medium transition-all duration-300 w-full shadow-lg hover:shadow-xl transform hover:scale-105">
                         <i class="fas fa-shoe-prints mr-2"></i> Update Steps
                     </button>
                 </form>
                 
-                <div class="mt-6">
-                    <h4 class="text-lg font-semibold text-gray-800 mb-2">Daily Goal Progress</h4>
-                    <p class="text-gray-700 mb-2"><span id="currentSteps">0</span> / <span id="goalSteps">10000</span> steps</p>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="stepsProgress" style="width: 0%"></div>
+                <div class="mt-8 p-6 bg-gradient-to-r from-green-50 to-teal-50 rounded-xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-lg font-semibold text-gray-800">Daily Goal Progress</h4>
+                        <div class="text-2xl font-bold text-green-600">
+                            <span id="stepsPercentage">0</span>%
+                        </div>
+                    </div>
+                    <p class="text-gray-700 mb-4"><span id="currentSteps">0</span> / <span id="goalSteps">10000</span> steps</p>
+                    <div class="progress-bar h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="progress-fill h-full bg-gradient-to-r from-green-600 to-teal-600 transition-all duration-500 ease-out" id="stepsProgress" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-2">
+                        <span>Start</span>
+                        <span>Goal: 10,000</span>
                     </div>
                 </div>
             </div>
@@ -234,32 +478,79 @@
     </section>
 
     <!-- Notes Section -->
-    <section id="notes" class="py-16 bg-gray-50">
+    <section id="notes" class="py-16 bg-gradient-to-br from-yellow-50 to-orange-50">
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-800 mb-2">Quick Notes</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">Jot down your thoughts, ideas, or anything important that comes to mind.</p>
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-yellow-600 to-orange-600 rounded-full mb-4">
+                    <i class="fas fa-sticky-note text-white text-2xl"></i>
+                </div>
+                <h2 class="text-4xl font-bold text-gray-800 mb-4">Smart Notes</h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Capture your thoughts, ideas, and important information with our intelligent note-taking system.</p>
             </div>
             
             <div class="max-w-3xl mx-auto">
-                <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8 mb-8 border border-yellow-100">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-gradient-to-r from-yellow-600 to-orange-600 p-2 rounded-lg mr-3">
+                            <i class="fas fa-edit text-white"></i>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-gray-800">Create New Note</h3>
+                    </div>
                     <form id="noteForm" class="space-y-4">
                         <div>
-                            <label for="noteContent" class="block text-gray-700 mb-2">Your Note</label>
-                            <textarea id="noteContent" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" placeholder="Write your note here..." required></textarea>
+                            <label for="noteTitle" class="block text-gray-700 mb-2 font-medium">Note Title (Optional)</label>
+                            <input type="text" id="noteTitle" placeholder="Give your note a title..." class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-600 focus:border-transparent transition-all duration-300 bg-gray-50 focus:bg-white">
                         </div>
                         
-                        <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition w-full">
+                        <div>
+                            <label for="noteContent" class="block text-gray-700 mb-2 font-medium">Note Content</label>
+                            <textarea id="noteContent" rows="6" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-600 focus:border-transparent transition-all duration-300 bg-gray-50 focus:bg-white resize-none" placeholder="Write your note here..." required></textarea>
+                        </div>
+                        
+                        <div>
+                            <label for="noteCategory" class="block text-gray-700 mb-2 font-medium">Category</label>
+                            <select id="noteCategory" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-600 focus:border-transparent transition-all duration-300 bg-gray-50 focus:bg-white">
+                                <option value="general">📝 General</option>
+                                <option value="work">💼 Work</option>
+                                <option value="personal">👤 Personal</option>
+                                <option value="ideas">💡 Ideas</option>
+                                <option value="shopping">🛒 Shopping List</option>
+                                <option value="goals">🎯 Goals</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white px-6 py-4 rounded-xl font-medium transition-all duration-300 w-full shadow-lg hover:shadow-xl transform hover:scale-105">
                             <i class="fas fa-save mr-2"></i> Save Note
                         </button>
                     </form>
                 </div>
                 
                 <div>
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Your Saved Notes</h3>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <div class="bg-gradient-to-r from-yellow-600 to-orange-600 p-2 rounded-lg mr-3">
+                                <i class="fas fa-folder text-white"></i>
+                            </div>
+                            <h3 class="text-2xl font-semibold text-gray-800">Your Saved Notes</h3>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button id="searchNotes" class="p-2 text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-all duration-300">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button id="sortNotes" class="p-2 text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-all duration-300">
+                                <i class="fas fa-sort"></i>
+                            </button>
+                        </div>
+                    </div>
                     <div id="notesList" class="grid md:grid-cols-2 gap-4">
                         <!-- Notes will be added here dynamically -->
-                        <p class="text-gray-500 text-center py-4 col-span-2">No notes saved yet. Add your first note above!</p>
+                        <div class="text-center py-12 col-span-2">
+                            <div class="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-sticky-note text-gray-400 text-2xl"></i>
+                            </div>
+                            <p class="text-gray-500 text-lg mb-2">No notes yet</p>
+                            <p class="text-gray-400 text-sm">Create your first note above to get started!</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -269,109 +560,162 @@
     <!-- Daily Tips Section -->
     <section id="tips" class="py-16 container mx-auto px-4">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">Daily Tips</h2>
-            <p class="text-gray-600 max-w-2xl mx-auto">Helpful tips to improve your daily routine and wellbeing.</p>
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full mb-4">
+                <i class="fas fa-lightbulb text-white text-2xl"></i>
+            </div>
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">Daily Wellness Tips</h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">Discover helpful tips and insights to improve your daily routine and overall wellbeing.</p>
         </div>
         
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
-                <div class="bg-purple-100 text-purple-600 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+            <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-purple-100">
+                <div class="bg-gradient-to-r from-purple-100 to-blue-100 text-purple-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                     <i class="fas fa-tint text-xl"></i>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">Stay Hydrated</h3>
-                <p class="text-gray-600">Drink at least 8 glasses of water throughout the day to stay hydrated and maintain energy levels.</p>
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Stay Hydrated</h3>
+                <p class="text-gray-600 leading-relaxed">Drink at least 8 glasses of water throughout the day to stay hydrated and maintain optimal energy levels.</p>
             </div>
             
-            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
-                <div class="bg-blue-100 text-blue-600 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+            <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-blue-100">
+                <div class="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                     <i class="fas fa-walking text-xl"></i>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">Move Regularly</h3>
-                <p class="text-gray-600">Take short breaks every hour to stretch or walk around to improve circulation and reduce fatigue.</p>
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Move Regularly</h3>
+                <p class="text-gray-600 leading-relaxed">Take short breaks every hour to stretch or walk around to improve circulation and reduce fatigue.</p>
             </div>
             
-            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
-                <div class="bg-green-100 text-green-600 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+            <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-green-100">
+                <div class="bg-gradient-to-r from-green-100 to-teal-100 text-green-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                     <i class="fas fa-apple-alt text-xl"></i>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">Eat Whole Foods</h3>
-                <p class="text-gray-600">Focus on eating whole, unprocessed foods like fruits, vegetables, and lean proteins for better nutrition.</p>
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Eat Whole Foods</h3>
+                <p class="text-gray-600 leading-relaxed">Focus on eating whole, unprocessed foods like fruits, vegetables, and lean proteins for better nutrition.</p>
             </div>
             
-            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
-                <div class="bg-yellow-100 text-yellow-600 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+            <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-yellow-100">
+                <div class="bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                     <i class="fas fa-moon text-xl"></i>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">Quality Sleep</h3>
-                <p class="text-gray-600">Aim for 7-9 hours of quality sleep each night to allow your body and mind to properly recover.</p>
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Quality Sleep</h3>
+                <p class="text-gray-600 leading-relaxed">Aim for 7-9 hours of quality sleep each night to allow your body and mind to properly recover.</p>
             </div>
             
-            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
-                <div class="bg-red-100 text-red-600 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+            <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-red-100">
+                <div class="bg-gradient-to-r from-red-100 to-pink-100 text-red-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                     <i class="fas fa-mobile-alt text-xl"></i>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">Digital Detox</h3>
-                <p class="text-gray-600">Take regular breaks from screens to reduce eye strain and improve focus on real-world interactions.</p>
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Digital Detox</h3>
+                <p class="text-gray-600 leading-relaxed">Take regular breaks from screens to reduce eye strain and improve focus on real-world interactions.</p>
             </div>
             
-            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
-                <div class="bg-indigo-100 text-indigo-600 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+            <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-indigo-100">
+                <div class="bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                     <i class="fas fa-book text-xl"></i>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">Lifelong Learning</h3>
-                <p class="text-gray-600">Dedicate time each day to learn something new to keep your mind sharp and engaged.</p>
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Lifelong Learning</h3>
+                <p class="text-gray-600 leading-relaxed">Dedicate time each day to learn something new to keep your mind sharp and engaged.</p>
+            </div>
+        </div>
+        
+        <!-- Daily Tip of the Day -->
+        <div class="mt-16 max-w-2xl mx-auto">
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-2xl p-8 text-white text-center">
+                <div class="bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-star text-2xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-4">Tip of the Day</h3>
+                <p class="text-lg leading-relaxed opacity-90" id="dailyTip">
+                    Start your day with a glass of water and 5 minutes of deep breathing to boost your energy and focus.
+                </p>
+                <button id="newTipButton" class="mt-6 bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-full font-medium transition-all duration-300">
+                    <i class="fas fa-refresh mr-2"></i> Get New Tip
+                </button>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-8">
+    <footer class="bg-gradient-to-r from-gray-800 to-gray-900 text-white py-12">
         <div class="container mx-auto px-4">
             <div class="grid md:grid-cols-3 gap-8">
                 <div>
                     <div class="flex items-center mb-4">
-                        <i class="fas fa-tasks text-purple-400 text-2xl mr-2"></i>
-                        <h3 class="text-xl font-bold text-purple-400">DailyHelp</h3>
+                        <div class="bg-gradient-to-r from-purple-600 to-blue-600 p-2 rounded-lg mr-3">
+                            <i class="fas fa-tasks text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">DailyHelp</h3>
                     </div>
-                    <p class="text-gray-400">Your daily tasks, all in one place. Helping you stay organized and productive every day.</p>
+                    <p class="text-gray-400 leading-relaxed">Your intelligent daily companion for productivity and wellness. Helping you stay organized and achieve your goals every day.</p>
                 </div>
                 
                 <div>
-                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <h4 class="text-xl font-semibold mb-6">Quick Links</h4>
                     <ul class="space-y-2">
-                        <li><a href="#home" class="text-gray-400 hover:text-white transition">Home</a></li>
-                        <li><a href="#reminders" class="text-gray-400 hover:text-white transition">Reminders</a></li>
-                        <li><a href="#expenses" class="text-gray-400 hover:text-white transition">Expenses</a></li>
-                        <li><a href="#health" class="text-gray-400 hover:text-white transition">Health</a></li>
-                        <li><a href="#notes" class="text-gray-400 hover:text-white transition">Notes</a></li>
-                        <li><a href="#tips" class="text-gray-400 hover:text-white transition">Tips</a></li>
+                        <li><a href="#home" class="text-gray-400 hover:text-purple-400 transition-colors duration-300 flex items-center"><i class="fas fa-home mr-2"></i>Home</a></li>
+                        <li><a href="#reminders" class="text-gray-400 hover:text-purple-400 transition-colors duration-300 flex items-center"><i class="fas fa-bell mr-2"></i>Reminders</a></li>
+                        <li><a href="#expenses" class="text-gray-400 hover:text-purple-400 transition-colors duration-300 flex items-center"><i class="fas fa-wallet mr-2"></i>Expenses</a></li>
+                        <li><a href="#health" class="text-gray-400 hover:text-purple-400 transition-colors duration-300 flex items-center"><i class="fas fa-heartbeat mr-2"></i>Health</a></li>
+                        <li><a href="#notes" class="text-gray-400 hover:text-purple-400 transition-colors duration-300 flex items-center"><i class="fas fa-sticky-note mr-2"></i>Notes</a></li>
+                        <li><a href="#tips" class="text-gray-400 hover:text-purple-400 transition-colors duration-300 flex items-center"><i class="fas fa-lightbulb mr-2"></i>Tips</a></li>
                     </ul>
                 </div>
                 
                 <div>
-                    <h4 class="text-lg font-semibold mb-4">Contact</h4>
+                    <h4 class="text-xl font-semibold mb-6">Contact</h4>
                     <ul class="space-y-2">
                         <li class="flex items-center">
-                            <i class="fas fa-envelope text-gray-400 mr-2"></i>
+                            <i class="fas fa-envelope text-purple-400 mr-3"></i>
                             <span class="text-gray-400">jimayank2105@gmail.com</span>
                         </li>
                         <li class="flex items-center">
-                            <i class="fas fa-phone text-gray-400 mr-2"></i>
+                            <i class="fas fa-phone text-purple-400 mr-3"></i>
                             <span class="text-gray-400">+91 9013584367</span>
                         </li>
                         <li class="flex items-center">
-                            <i class="fas fa-map-marker-alt text-gray-400 mr-2"></i>
+                            <i class="fas fa-map-marker-alt text-purple-400 mr-3"></i>
                             <span class="text-gray-400">Faridabad</span>
                         </li>
                     </ul>
                 </div>
             </div>
             
-            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
-                <p>&copy; 2023 DailyHelp. All rights reserved.</p>
+            <div class="border-t border-gray-700 mt-12 pt-8 text-center">
+                <p class="text-gray-400 mb-4">&copy; 2024 DailyHelp. All rights reserved.</p>
+                <div class="flex justify-center space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-purple-400 transition-colors duration-300">
+                        <i class="fab fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-purple-400 transition-colors duration-300">
+                        <i class="fab fa-facebook text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-purple-400 transition-colors duration-300">
+                        <i class="fab fa-instagram text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-purple-400 transition-colors duration-300">
+                        <i class="fab fa-linkedin text-xl"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </footer>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-20 right-4 bg-white shadow-lg rounded-lg p-4 transform translate-x-full transition-transform duration-300 z-50 border-l-4 border-green-500">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <i class="fas fa-check-circle text-green-500"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm font-medium text-gray-900" id="toastMessage">Success message</p>
+            </div>
+            <div class="ml-auto pl-3">
+                <button id="closeToast" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 
 </body>
