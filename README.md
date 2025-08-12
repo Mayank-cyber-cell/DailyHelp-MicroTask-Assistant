@@ -39,10 +39,7 @@ or just reminding yourself to breathe—DailyHelp’s got your back.
 - ✏️ Edit & delete existing tasks  
 - ☁️ Optional cloud sync for cross-device access  
 
----
 
-## 🖼 Sneak Peek
-![App Preview]((https://daily-help-micro-task-assistant.vercel.app/))
 
 ---
 
@@ -53,4 +50,5 @@ Go ahead, fork it, remix it, and make it your own 🎨.
 ---
 
 > _“Small tasks done daily beat big plans left undone.”_ 💡
+
 
