@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DailyHelp: Micro Task Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Header/Navbar -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <i class="fas fa-tasks text-purple-600 text-2xl mr-2"></i>
+                <h1 class="text-xl font-bold text-purple-600">DailyHelp</h1>
+            </div>
+            
+            <nav class="hidden md:flex space-x-6">
+                <a href="#home" class="text-gray-700 hover:text-purple-600 transition">Home</a>
+                <a href="#reminders" class="text-gray-700 hover:text-purple-600 transition">Reminders</a>
+                <a href="#expenses" class="text-gray-700 hover:text-purple-600 transition">Expenses</a>
+                <a href="#health" class="text-gray-700 hover:text-purple-600 transition">Health</a>
+                <a href="#notes" class="text-gray-700 hover:text-purple-600 transition">Notes</a>
+                <a href="#tips" class="text-gray-700 hover:text-purple-600 transition">Tips</a>
+            </nav>
+            
+            <button class="hamburger-menu md:hidden text-gray-700" id="hamburger">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+        
+        <div class="mobile-menu container mx-auto px-4 py-2" id="mobileMenu">
+            <a href="#home" class="block py-2 text-gray-700 hover:text-purple-600 transition">Home</a>
+            <a href="#reminders" class="block py-2 text-gray-700 hover:text-purple-600 transition">Reminders</a>
+            <a href="#expenses" class="block py-2 text-gray-700 hover:text-purple-600 transition">Expenses</a>
+            <a href="#health" class="block py-2 text-gray-700 hover:text-purple-600 transition">Health</a>
+            <a href="#notes" class="block py-2 text-gray-700 hover:text-purple-600 transition">Notes</a>
+            <a href="#tips" class="block py-2 text-gray-700 hover:text-purple-600 transition">Tips</a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="py-16 md:py-24 bg-gradient-to-r from-purple-50 to-blue-50">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-10 md:mb-0">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">DailyHelp</h1>
+                <p class="text-xl text-gray-600 mb-8">Your daily tasks, all in one place.</p>
+                <a href="#reminders" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-full font-medium transition shadow-md hover:shadow-lg">
+                    Get Started <i class="fas fa-arrow-down ml-2"></i>
+                </a>
+            </div>
+            <div class="md:w-1/2 flex justify-center">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col items-center">
+                        <i class="fas fa-bell text-purple-600 text-3xl mb-3"></i>
+                        <p class="text-gray-700">Reminders</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col items-center">
+                        <i class="fas fa-wallet text-blue-600 text-3xl mb-3"></i>
+                        <p class="text-gray-700">Expenses</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col items-center">
+                        <i class="fas fa-heartbeat text-green-600 text-3xl mb-3"></i>
+                        <p class="text-gray-700">Health</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md flex flex-col items-center">
+                        <i class="fas fa-sticky-note text-yellow-600 text-3xl mb-3"></i>
+                        <p class="text-gray-700">Notes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reminders Section -->
+    <section id="reminders" class="py-16 container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Reminders</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Never miss an important task again with our simple reminder system.</p>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-md p-6 max-w-2xl mx-auto mb-8">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Add New Reminder</h3>
+            <form id="reminderForm" class="space-y-4">
+                <div>
+                    <label for="taskName" class="block text-gray-700 mb-2">Task Name</label>
+                    <input type="text" id="taskName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" required>
+                </div>
+                
+                <div>
+                    <label for="taskTime" class="block text-gray-700 mb-2">Time</label>
+                    <input type="time" id="taskTime" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" required>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 mb-2">Repeat</label>
+                    <div class="flex space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="repeat" value="yes" class="text-purple-600 focus:ring-purple-600">
+                            <span class="ml-2">Yes</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="repeat" value="no" checked class="text-purple-600 focus:ring-purple-600">
+                            <span class="ml-2">No</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition w-full">
+                    <i class="fas fa-plus mr-2"></i> Add Reminder
+                </button>
+            </form>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-md p-6 max-w-2xl mx-auto">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Your Reminders</h3>
+            <div id="remindersList" class="space-y-3">
+                <!-- Reminders will be added here dynamically -->
+                <p class="text-gray-500 text-center py-4" id="noRemindersText">No reminders added yet. Add your first reminder above!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Expenses Section -->
+    <section id="expenses" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Expenses Tracker</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Keep track of your spending and manage your budget effectively.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Add New Expense</h3>
+                    <form id="expenseForm" class="space-y-4">
+                        <div>
+                            <label for="expenseAmount" class="block text-gray-700 mb-2">Amount ($)</label>
+                            <input type="number" id="expenseAmount" step="0.01" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" required>
+                        </div>
+                        
+                        <div>
+                            <label for="expenseCategory" class="block text-gray-700 mb-2">Category</label>
+                            <select id="expenseCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" required>
+                                <option value="">Select a category</option>
+                                <option value="Food">Food</option>
+                                <option value="Transportation">Transportation</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Utilities">Utilities</option>
+                                <option value="Shopping">Shopping</option>
+                                <option value="Health">Health</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition w-full">
+                            <i class="fas fa-plus mr-2"></i> Add Expense
+                        </button>
+                    </form>
+                    
+                    <div class="mt-8">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-2">Total Expenses</h4>
+                        <p class="text-2xl font-bold text-purple-600" id="totalExpenses">$0.00</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Expense Breakdown</h3>
+                    <div id="expenseBreakdown" class="space-y-4">
+                        <!-- Expense breakdown will be added here dynamically -->
+                        <p class="text-gray-500 text-center py-4">No expenses recorded yet. Add your first expense to see the breakdown.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Health Section -->
+    <section id="health" class="py-16 container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Health Tracker</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Monitor your health metrics and stay on top of your wellness goals.</p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">BMI Calculator</h3>
+                <form id="bmiForm" class="space-y-4">
+                    <div>
+                        <label for="height" class="block text-gray-700 mb-2">Height (cm)</label>
+                        <input type="number" id="height" min="100" max="250" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" required>
+                    </div>
+                    
+                    <div>
+                        <label for="weight" class="block text-gray-700 mb-2">Weight (kg)</label>
+                        <input type="number" id="weight" min="30" max="300" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" required>
+                    </div>
+                    
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition w-full">
+                        <i class="fas fa-calculator mr-2"></i> Calculate BMI
+                    </button>
+                </form>
+                
+                <div id="bmiResult" class="mt-6 hidden">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-2">Your BMI Result</h4>
+                    <p class="text-2xl font-bold mb-2" id="bmiValue">0.0</p>
+                    <p class="text-gray-700" id="bmiCategory">Category will appear here</p>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Steps Tracker</h3>
+                <form id="stepsForm" class="space-y-4">
+                    <div>
+                        <label for="steps" class="block text-gray-700 mb-2">Today's Steps</label>
+                        <input type="number" id="steps" min="0" max="50000" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" required>
+                    </div>
+                    
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition w-full">
+                        <i class="fas fa-shoe-prints mr-2"></i> Update Steps
+                    </button>
+                </form>
+                
+                <div class="mt-6">
+                    <h4 class="text-lg font-semibold text-gray-800 mb-2">Daily Goal Progress</h4>
+                    <p class="text-gray-700 mb-2"><span id="currentSteps">0</span> / <span id="goalSteps">10000</span> steps</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="stepsProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notes Section -->
+    <section id="notes" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Quick Notes</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Jot down your thoughts, ideas, or anything important that comes to mind.</p>
+            </div>
+            
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                    <form id="noteForm" class="space-y-4">
+                        <div>
+                            <label for="noteContent" class="block text-gray-700 mb-2">Your Note</label>
+                            <textarea id="noteContent" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent" placeholder="Write your note here..." required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition w-full">
+                            <i class="fas fa-save mr-2"></i> Save Note
+                        </button>
+                    </form>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Your Saved Notes</h3>
+                    <div id="notesList" class="grid md:grid-cols-2 gap-4">
+                        <!-- Notes will be added here dynamically -->
+                        <p class="text-gray-500 text-center py-4 col-span-2">No notes saved yet. Add your first note above!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Daily Tips Section -->
+    <section id="tips" class="py-16 container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Daily Tips</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Helpful tips to improve your daily routine and wellbeing.</p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
+                <div class="bg-purple-100 text-purple-600 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-tint text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Stay Hydrated</h3>
+                <p class="text-gray-600">Drink at least 8 glasses of water throughout the day to stay hydrated and maintain energy levels.</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
+                <div class="bg-blue-100 text-blue-600 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-walking text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Move Regularly</h3>
+                <p class="text-gray-600">Take short breaks every hour to stretch or walk around to improve circulation and reduce fatigue.</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
+                <div class="bg-green-100 text-green-600 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-apple-alt text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Eat Whole Foods</h3>
+                <p class="text-gray-600">Focus on eating whole, unprocessed foods like fruits, vegetables, and lean proteins for better nutrition.</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
+                <div class="bg-yellow-100 text-yellow-600 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-moon text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Quality Sleep</h3>
+                <p class="text-gray-600">Aim for 7-9 hours of quality sleep each night to allow your body and mind to properly recover.</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
+                <div class="bg-red-100 text-red-600 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-mobile-alt text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Digital Detox</h3>
+                <p class="text-gray-600">Take regular breaks from screens to reduce eye strain and improve focus on real-world interactions.</p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition">
+                <div class="bg-indigo-100 text-indigo-600 w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-book text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Lifelong Learning</h3>
+                <p class="text-gray-600">Dedicate time each day to learn something new to keep your mind sharp and engaged.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-3 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-tasks text-purple-400 text-2xl mr-2"></i>
+                        <h3 class="text-xl font-bold text-purple-400">DailyHelp</h3>
+                    </div>
+                    <p class="text-gray-400">Your daily tasks, all in one place. Helping you stay organized and productive every day.</p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="text-gray-400 hover:text-white transition">Home</a></li>
+                        <li><a href="#reminders" class="text-gray-400 hover:text-white transition">Reminders</a></li>
+                        <li><a href="#expenses" class="text-gray-400 hover:text-white transition">Expenses</a></li>
+                        <li><a href="#health" class="text-gray-400 hover:text-white transition">Health</a></li>
+                        <li><a href="#notes" class="text-gray-400 hover:text-white transition">Notes</a></li>
+                        <li><a href="#tips" class="text-gray-400 hover:text-white transition">Tips</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Contact</h4>
+                    <ul class="space-y-2">
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope text-gray-400 mr-2"></i>
+                            <span class="text-gray-400">jimayank2105@gmail.com</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone text-gray-400 mr-2"></i>
+                            <span class="text-gray-400">+91 9013584367</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt text-gray-400 mr-2"></i>
+                            <span class="text-gray-400">Faridabad</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+                <p>&copy; 2023 DailyHelp. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+
+</body>
+</html>
