@@ -42,7 +42,7 @@ or just reminding yourself to breathe—DailyHelp’s got your back.
 ---
 
 ## 🖼 Sneak Peek
-![App Preview](https://via.placeholder.com/800x400?text=DailyHelp+Preview)
+![App Preview]((https://daily-help-micro-task-assistant.vercel.app/))
 
 ---
 
@@ -53,3 +53,4 @@ Go ahead, fork it, remix it, and make it your own 🎨.
 ---
 
 > _“Small tasks done daily beat big plans left undone.”_ 💡
+
