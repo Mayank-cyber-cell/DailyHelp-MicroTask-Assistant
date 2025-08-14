@@ -13,7 +13,6 @@ let currentSort = 'date';
 // DOM Elements
 const hamburger = document.getElementById('hamburger');
 const mobileMenu = document.getElementById('mobileMenu');
-const darkModeToggle = document.getElementById('darkModeToggle');
 const fabButton = document.getElementById('fabButton');
 const fabMenu = document.getElementById('fabMenu');
 const loadingScreen = document.getElementById('loadingScreen');
@@ -25,7 +24,6 @@ const reminderCount = document.getElementById('reminderCount');
 const totalExpensesQuick = document.getElementById('totalExpensesQuick');
 const stepsCountQuick = document.getElementById('stepsCountQuick');
 const stepsPercentage = document.getElementById('stepsPercentage');
-const tourButton = document.getElementById('tourButton');
 const newTipButton = document.getElementById('newTipButton');
 const dailyTip = document.getElementById('dailyTip');
 const reminderForm = document.getElementById('reminderForm');
@@ -49,6 +47,9 @@ const noteForm = document.getElementById('noteForm');
 const notesList = document.getElementById('notesList');
 const searchNotes = document.getElementById('searchNotes');
 const sortNotes = document.getElementById('sortNotes');
+const darkModeToggle = document.getElementById('darkModeToggle');
+const settingsToggle = document.getElementById('settingsToggle');
+const fullscreenToggle = document.getElementById('fullscreenToggle');
 
 // Daily tips array
 const dailyTips = [
@@ -69,10 +70,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Show loading screen
     setTimeout(() => {
         loadingScreen.style.opacity = '0';
+        loadingScreen.style.transform = 'scale(0.95)';
         setTimeout(() => {
             loadingScreen.style.display = 'none';
-        }, 500);
-    }, 1500);
+        }, 300);
+    }, 1200);
 
     // Initialize the app
     initializeApp();
@@ -97,8 +99,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Apply dark mode if enabled
     if (isDarkMode) {
         document.body.classList.add('dark');
-        darkModeToggle.innerHTML = '<i class="fas fa-sun text-yellow-500"></i>';
+        darkModeToggle.innerHTML = '<i class="fas fa-sun text-lg"></i>';
     }
+    
+    // Initialize toggle bar animations
+    initializeToggleBar();
 });
 
 hamburger.addEventListener('click', function () {
@@ -110,19 +115,67 @@ darkModeToggle.addEventListener('click', function () {
     isDarkMode = !isDarkMode;
     document.body.classList.toggle('dark');
     
+    // Add transition effect
+    document.body.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+    
     if (isDarkMode) {
-        this.innerHTML = '<i class="fas fa-sun text-yellow-500"></i>';
+        this.innerHTML = '<i class="fas fa-sun text-lg"></i>';
+        this.style.color = '#fbbf24';
     } else {
-        this.innerHTML = '<i class="fas fa-moon text-gray-600"></i>';
+        this.innerHTML = '<i class="fas fa-moon text-lg"></i>';
+        this.style.color = '#6b7280';
     }
     
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
-    showToast('Theme updated successfully!', 'success');
+    showToast(`${isDarkMode ? 'Dark' : 'Light'} mode activated!`, 'success');
+    
+    // Add animation effect
+    this.style.transform = 'scale(1.2)';
+    setTimeout(() => {
+        this.style.transform = 'scale(1)';
+    }, 200);
+});
+
+// Settings toggle
+settingsToggle.addEventListener('click', function () {
+    showToast('Settings panel coming soon!', 'info');
+    this.style.transform = 'rotate(180deg)';
+    setTimeout(() => {
+        this.style.transform = 'rotate(0deg)';
+    }, 300);
+});
+
+// Fullscreen toggle
+fullscreenToggle.addEventListener('click', function () {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().then(() => {
+            this.innerHTML = '<i class="fas fa-compress text-lg"></i>';
+            showToast('Entered fullscreen mode', 'success');
+        });
+    } else {
+        document.exitFullscreen().then(() => {
+            this.innerHTML = '<i class="fas fa-expand text-lg"></i>';
+            showToast('Exited fullscreen mode', 'info');
+        });
+    }
+    
+    // Animation effect
+    this.style.transform = 'scale(1.2)';
+    setTimeout(() => {
+        this.style.transform = 'scale(1)';
+    }, 200);
 });
 
 // FAB functionality
 fabButton.addEventListener('click', function () {
     fabMenu.classList.toggle('active');
+    
+    // Rotate FAB button
+    if (fabMenu.classList.contains('active')) {
+        this.style.transform = 'rotate(45deg)';
+    } else {
+        this.style.transform = 'rotate(0deg)';
+    }
 });
 
 // FAB menu items
@@ -148,16 +201,17 @@ document.querySelectorAll('.fab-item').forEach(item => {
     });
 });
 
-// Tour button
-tourButton.addEventListener('click', function () {
-    showToast('Welcome to DailyHelp! Explore each section to discover all features.', 'info');
-    // Could implement a proper tour library here
-});
-
 // New tip button
 newTipButton.addEventListener('click', function () {
     setRandomDailyTip();
-    showToast('New tip loaded!', 'success');
+    showToast('✨ New tip loaded!', 'success');
+    
+    // Add rotation animation
+    const icon = this.querySelector('i');
+    icon.style.transform = 'rotate(360deg)';
+    setTimeout(() => {
+        icon.style.transform = 'rotate(0deg)';
+    }, 500);
 });
 
 // Toast close button
@@ -191,7 +245,10 @@ reminderForm.addEventListener('submit', function (e) {
 
     // Reset form
     reminderForm.reset();
-    showToast('Reminder added successfully!', 'success');
+    showToast('✅ Reminder added successfully!', 'success');
+    
+    // Add success animation
+    addSuccessAnimation(reminderForm);
 });
 
 // Sort reminders
@@ -233,13 +290,16 @@ expenseForm.addEventListener('submit', function (e) {
 
     // Reset form
     expenseForm.reset();
-    showToast('Expense added successfully!', 'success');
+    showToast('💰 Expense added successfully!', 'success');
+    
+    // Add success animation
+    addSuccessAnimation(expenseForm);
 });
 
 // Export expenses
 exportExpenses.addEventListener('click', function () {
     exportExpensesToCSV();
-    showToast('Expenses exported successfully!', 'success');
+    showToast('📊 Expenses exported successfully!', 'success');
 });
 
 // BMI Calculator functionality
@@ -261,7 +321,10 @@ bmiForm.addEventListener('submit', function (e) {
 
     // Show result
     bmiResult.classList.remove('hidden');
-    showToast('BMI calculated successfully!', 'success');
+    showToast('📏 BMI calculated successfully!', 'success');
+    
+    // Add success animation
+    addSuccessAnimation(bmiForm);
 });
 
 // Steps Tracker functionality
@@ -275,7 +338,10 @@ stepsForm.addEventListener('submit', function (e) {
 
     // Reset form
     stepsForm.reset();
-    showToast('Steps updated successfully!', 'success');
+    showToast('👟 Steps updated successfully!', 'success');
+    
+    // Add success animation
+    addSuccessAnimation(stepsForm);
 });
 
 // Notes functionality
@@ -300,7 +366,10 @@ noteForm.addEventListener('submit', function (e) {
 
     // Reset form
     noteForm.reset();
-    showToast('Note saved successfully!', 'success');
+    showToast('📝 Note saved successfully!', 'success');
+    
+    // Add success animation
+    addSuccessAnimation(noteForm);
 });
 
 // Search notes
@@ -323,7 +392,47 @@ sortNotes.addEventListener('click', function () {
 // Helper functions
 function initializeApp() {
     // Set up any initial configurations
+    initializeAnimations();
     console.log('DailyHelp initialized successfully!');
+}
+
+function initializeAnimations() {
+    // Add stagger animation to feature cards
+    const featureCards = document.querySelectorAll('.feature-card');
+    featureCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+    
+    // Add stagger animation to tip cards
+    const tipCards = document.querySelectorAll('.tip-card');
+    tipCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+    });
+}
+
+function initializeToggleBar() {
+    // Add hover effects to toggle buttons
+    const toggleButtons = [darkModeToggle, settingsToggle, fullscreenToggle];
+    
+    toggleButtons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.1)';
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+}
+
+function addSuccessAnimation(element) {
+    element.style.transform = 'scale(1.02)';
+    element.style.boxShadow = '0 0 20px rgba(34, 197, 94, 0.3)';
+    
+    setTimeout(() => {
+        element.style.transform = 'scale(1)';
+        element.style.boxShadow = '';
+    }, 300);
 }
 
 function updateCurrentDate() {
@@ -351,17 +460,22 @@ function setRandomDailyTip() {
 
 function showToast(message, type = 'success') {
     toastMessage.textContent = message;
-    toast.className = `fixed top-20 right-4 bg-white shadow-lg rounded-lg p-4 transform transition-transform duration-300 z-50 border-l-4 toast-${type}`;
-    toast.style.transform = 'translateX(0)';
+    toast.className = `fixed top-20 right-4 bg-white shadow-lg rounded-lg p-4 transform transition-all duration-500 z-50 border-l-4 toast-${type}`;
+    toast.style.transform = 'translateX(0) scale(1)';
+    toast.style.opacity = '1';
+    
+    // Add entrance animation
+    toast.style.animation = 'slideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
     
     // Auto hide after 3 seconds
     setTimeout(() => {
         hideToast();
-    }, 3000);
+    }, 4000);
 }
 
 function hideToast() {
-    toast.style.transform = 'translateX(100%)';
+    toast.style.transform = 'translateX(100%) scale(0.95)';
+    toast.style.opacity = '0';
 }
 
 function renderReminders() {
@@ -673,7 +787,7 @@ function deleteReminder(id) {
         saveReminders();
         renderReminders();
         updateQuickStats();
-        showToast('Reminder deleted successfully!', 'success');
+        showToast('🗑️ Reminder deleted successfully!', 'success');
     }
 }
 
@@ -682,9 +796,9 @@ function completeReminder(id) {
     if (reminder) {
         if (reminder.repeat === 'no') {
             deleteReminder(id);
-            showToast('Reminder completed and removed!', 'success');
+            showToast('✅ Reminder completed and removed!', 'success');
         } else {
-            showToast('Recurring reminder completed! It will repeat as scheduled.', 'info');
+            showToast('🔄 Recurring reminder completed! It will repeat as scheduled.', 'info');
         }
     }
 }
@@ -694,7 +808,7 @@ function deleteNote(id) {
         notes = notes.filter(note => note.id !== id);
         saveNotes();
         renderNotes();
-        showToast('Note deleted successfully!', 'success');
+        showToast('🗑️ Note deleted successfully!', 'success');
     }
 }
 
@@ -821,10 +935,23 @@ document.addEventListener('keydown', function(e) {
         fabButton.click();
     }
     
+    // Ctrl/Cmd + D for dark mode toggle
+    if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+        e.preventDefault();
+        darkModeToggle.click();
+    }
+    
+    // F11 for fullscreen
+    if (e.key === 'F11') {
+        e.preventDefault();
+        fullscreenToggle.click();
+    }
+    
     // Escape to close modals/menus
     if (e.key === 'Escape') {
         mobileMenu.classList.remove('active');
         fabMenu.classList.remove('active');
+        fabButton.style.transform = 'rotate(0deg)';
         hideToast();
     }
 });
@@ -856,6 +983,33 @@ if ('serviceWorker' in navigator) {
 window.addEventListener('load', () => {
     setTimeout(() => {
         const perfData = performance.getEntriesByType('navigation')[0];
-        console.log('Page load time:', perfData.loadEventEnd - perfData.loadEventStart, 'ms');
+        console.log('🚀 Page load time:', perfData.loadEventEnd - perfData.loadEventStart, 'ms');
+        
+        // Show welcome message after load
+        setTimeout(() => {
+            showToast('🎉 Welcome to DailyHelp by Mayank Shah!', 'success');
+        }, 1000);
     }, 0);
+});
+
+// Add smooth scroll behavior enhancement
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            // Add scroll animation
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+            
+            // Add highlight effect to target section
+            target.style.transform = 'scale(1.01)';
+            target.style.transition = 'transform 0.3s ease';
+            setTimeout(() => {
+                target.style.transform = 'scale(1)';
+            }, 300);
+        }
+    });
 });
