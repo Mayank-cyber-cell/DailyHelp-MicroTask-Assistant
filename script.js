@@ -9,6 +9,38 @@ let bmiData = JSON.parse(localStorage.getItem('bmiData')) || null;
 let isDarkMode = JSON.parse(localStorage.getItem('darkMode')) || false;
 let currentFilter = 'all';
 let currentSort = 'date';
+let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+let tourStep = 0;
+let isToggleBarVisible = true;
+
+// Tour steps
+const tourSteps = [
+    {
+        element: '#toggleBar',
+        title: 'Settings Panel',
+        description: 'Access dark mode, settings, fullscreen, and help from this convenient side panel.'
+    },
+    {
+        element: '#fabButton',
+        title: 'Quick Actions',
+        description: 'Use this floating button to quickly add reminders, expenses, or notes.'
+    },
+    {
+        element: '#reminders',
+        title: 'Smart Reminders',
+        description: 'Set up reminders with different priorities and repeat options.'
+    },
+    {
+        element: '#expenses',
+        title: 'Expense Tracking',
+        description: 'Track your spending by category and monitor your budget.'
+    },
+    {
+        element: '#health',
+        title: 'Health Monitoring',
+        description: 'Calculate your BMI and track your daily steps.'
+    }
+];
 
 // DOM Elements
 const hamburger = document.getElementById('hamburger');
@@ -26,6 +58,18 @@ const stepsCountQuick = document.getElementById('stepsCountQuick');
 const stepsPercentage = document.getElementById('stepsPercentage');
 const newTipButton = document.getElementById('newTipButton');
 const dailyTip = document.getElementById('dailyTip');
+const notificationBell = document.getElementById('notificationBell');
+const notificationPanel = document.getElementById('notificationPanel');
+const notificationBadge = document.getElementById('notificationBadge');
+const closeNotifications = document.getElementById('closeNotifications');
+const userProfile = document.getElementById('userProfile');
+const helpToggle = document.getElementById('helpToggle');
+const helpPanel = document.getElementById('helpPanel');
+const closeHelp = document.getElementById('closeHelp');
+const tourButton = document.getElementById('tourButton');
+const tourOverlay = document.getElementById('tourOverlay');
+const skipTour = document.getElementById('skipTour');
+const nextTour = document.getElementById('nextTour');
 const reminderForm = document.getElementById('reminderForm');
 const remindersList = document.getElementById('remindersList');
 const noRemindersText = document.getElementById('noRemindersText');
@@ -47,9 +91,10 @@ const noteForm = document.getElementById('noteForm');
 const notesList = document.getElementById('notesList');
 const searchNotes = document.getElementById('searchNotes');
 const sortNotes = document.getElementById('sortNotes');
-const darkModeToggle = document.getElementById('darkModeToggle');
+const darkModeToggleMain = document.getElementById('darkModeToggleMain');
 const settingsToggle = document.getElementById('settingsToggle');
 const fullscreenToggle = document.getElementById('fullscreenToggle');
+const toggleBar = document.getElementById('toggleBar');
 
 // Daily tips array
 const dailyTips = [
@@ -107,11 +152,66 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 hamburger.addEventListener('click', function () {
-    mobileMenu.classList.toggle('active');
+    const isActive = mobileMenu.classList.contains('active');
+    if (isActive) {
+        mobileMenu.classList.remove('active');
+        mobileMenu.classList.add('hidden');
+    } else {
+        mobileMenu.classList.add('active');
+        mobileMenu.classList.remove('hidden');
+    }
 });
 
-// Dark mode toggle
-darkModeToggle.addEventListener('click', function () {
+// Notification bell
+notificationBell.addEventListener('click', function () {
+    const isVisible = !notificationPanel.classList.contains('translate-x-full');
+    if (isVisible) {
+        notificationPanel.classList.add('translate-x-full');
+    } else {
+        notificationPanel.classList.remove('translate-x-full');
+        updateNotificationBadge();
+    }
+});
+
+// Close notifications
+closeNotifications.addEventListener('click', function () {
+    notificationPanel.classList.add('translate-x-full');
+});
+
+// User profile
+userProfile.addEventListener('click', function () {
+    showToast('Profile settings coming soon!', 'info');
+});
+
+// Help toggle
+helpToggle.addEventListener('click', function () {
+    helpPanel.classList.remove('hidden');
+    this.style.transform = 'scale(1.2)';
+    setTimeout(() => {
+        this.style.transform = 'scale(1)';
+    }, 200);
+});
+
+// Close help
+closeHelp.addEventListener('click', function () {
+    helpPanel.classList.add('hidden');
+});
+
+// Tour functionality
+tourButton.addEventListener('click', function () {
+    startTour();
+});
+
+skipTour.addEventListener('click', function () {
+    endTour();
+});
+
+nextTour.addEventListener('click', function () {
+    nextTourStep();
+});
+
+// Dark mode toggle (main)
+darkModeToggleMain.addEventListener('click', function () {
     isDarkMode = !isDarkMode;
     document.body.classList.toggle('dark');
     
@@ -138,7 +238,7 @@ darkModeToggle.addEventListener('click', function () {
 
 // Settings toggle
 settingsToggle.addEventListener('click', function () {
-    showToast('Settings panel coming soon!', 'info');
+    showToast('⚙️ Advanced settings coming soon!', 'info');
     this.style.transform = 'rotate(180deg)';
     setTimeout(() => {
         this.style.transform = 'rotate(0deg)';
@@ -164,6 +264,17 @@ fullscreenToggle.addEventListener('click', function () {
     setTimeout(() => {
         this.style.transform = 'scale(1)';
     }, 200);
+});
+
+// Toggle bar visibility on scroll
+let lastScrollY = window.scrollY;
+window.addEventListener('scroll', () => {
+    if (window.scrollY > lastScrollY && window.scrollY > 100) {
+        toggleBar.style.transform = 'translateX(-100%)';
+    } else {
+        toggleBar.style.transform = 'translateX(0)';
+    }
+    lastScrollY = window.scrollY;
 });
 
 // FAB functionality
@@ -235,13 +346,15 @@ reminderForm.addEventListener('submit', function (e) {
         priority: taskPriority,
         repeat,
         completed: false,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        notified: false
     };
 
     reminders.push(reminder);
     saveReminders();
     renderReminders();
     updateQuickStats();
+    addNotification('Reminder Added', `"${taskName}" has been scheduled for ${formatTime(taskTime)}`);
 
     // Reset form
     reminderForm.reset();
@@ -287,6 +400,7 @@ expenseForm.addEventListener('submit', function (e) {
     saveExpenses();
     renderExpenses();
     updateQuickStats();
+    addNotification('Expense Added', `$${amount.toFixed(2)} spent on ${category}`);
 
     // Reset form
     expenseForm.reset();
@@ -363,6 +477,7 @@ noteForm.addEventListener('submit', function (e) {
     notes.push(note);
     saveNotes();
     renderNotes();
+    addNotification('Note Saved', `"${note.title}" has been saved`);
 
     // Reset form
     noteForm.reset();
@@ -412,7 +527,7 @@ function initializeAnimations() {
 
 function initializeToggleBar() {
     // Add hover effects to toggle buttons
-    const toggleButtons = [darkModeToggle, settingsToggle, fullscreenToggle];
+    const toggleButtons = [darkModeToggleMain, settingsToggle, fullscreenToggle, helpToggle];
     
     toggleButtons.forEach(button => {
         button.addEventListener('mouseenter', function() {
@@ -423,6 +538,12 @@ function initializeToggleBar() {
             this.style.transform = 'scale(1)';
         });
     });
+    
+    // Show toggle bar with animation
+    setTimeout(() => {
+        toggleBar.style.opacity = '1';
+        toggleBar.style.transform = 'translateX(0)';
+    }, 1000);
 }
 
 function addSuccessAnimation(element) {
@@ -451,6 +572,110 @@ function updateQuickStats() {
     const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
     totalExpensesQuick.textContent = total.toFixed(2);
     stepsCountQuick.textContent = steps.toLocaleString();
+    updateNotificationBadge();
+}
+
+function updateNotificationBadge() {
+    const unreadCount = notifications.filter(n => !n.read).length;
+    if (unreadCount > 0) {
+        notificationBadge.textContent = unreadCount;
+        notificationBadge.classList.remove('hidden');
+    } else {
+        notificationBadge.classList.add('hidden');
+    }
+}
+
+function addNotification(title, message) {
+    const notification = {
+        id: Date.now(),
+        title,
+        message,
+        timestamp: new Date().toISOString(),
+        read: false
+    };
+    
+    notifications.unshift(notification);
+    if (notifications.length > 50) {
+        notifications = notifications.slice(0, 50);
+    }
+    
+    saveNotifications();
+    updateNotificationBadge();
+    renderNotifications();
+}
+
+function renderNotifications() {
+    const notificationList = document.getElementById('notificationList');
+    
+    if (notifications.length === 0) {
+        notificationList.innerHTML = `
+            <div class="p-4 text-center text-gray-500">
+                <i class="fas fa-bell-slash text-2xl mb-2"></i>
+                <p>No notifications yet</p>
+            </div>
+        `;
+        return;
+    }
+    
+    notificationList.innerHTML = notifications.slice(0, 10).map(notification => `
+        <div class="p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${!notification.read ? 'bg-blue-50' : ''}">
+            <div class="flex justify-between items-start">
+                <div class="flex-1">
+                    <h4 class="font-medium text-gray-800 text-sm">${notification.title}</h4>
+                    <p class="text-gray-600 text-xs mt-1">${notification.message}</p>
+                    <p class="text-gray-400 text-xs mt-1">${formatDate(notification.timestamp)}</p>
+                </div>
+                ${!notification.read ? '<div class="w-2 h-2 bg-blue-500 rounded-full mt-1"></div>' : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function startTour() {
+    tourStep = 0;
+    tourOverlay.classList.remove('hidden');
+    showTourStep();
+}
+
+function showTourStep() {
+    if (tourStep >= tourSteps.length) {
+        endTour();
+        return;
+    }
+    
+    const step = tourSteps[tourStep];
+    const element = document.querySelector(step.element);
+    
+    if (element) {
+        const rect = element.getBoundingClientRect();
+        const spotlight = document.getElementById('tourSpotlight');
+        const tooltip = document.getElementById('tourTooltip');
+        
+        spotlight.style.left = `${rect.left - 10}px`;
+        spotlight.style.top = `${rect.top - 10}px`;
+        spotlight.style.width = `${rect.width + 20}px`;
+        spotlight.style.height = `${rect.height + 20}px`;
+        
+        tooltip.style.left = `${rect.right + 20}px`;
+        tooltip.style.top = `${rect.top}px`;
+        
+        document.getElementById('tourTitle').textContent = step.title;
+        document.getElementById('tourDescription').textContent = step.description;
+        
+        // Scroll element into view
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+function nextTourStep() {
+    tourStep++;
+    showTourStep();
+}
+
+function endTour() {
+    tourOverlay.classList.add('hidden');
+    tourStep = 0;
+    showToast('🎉 Tour completed! You\'re ready to use DailyHelp!', 'success');
 }
 
 function setRandomDailyTip() {
@@ -857,6 +1082,10 @@ function saveBmiData() {
     localStorage.setItem('bmiData', JSON.stringify(bmiData));
 }
 
+function saveNotifications() {
+    localStorage.setItem('notifications', JSON.stringify(notifications));
+}
+
 // Animation and scroll functions
 function setupIntersectionObserver() {
     const sections = document.querySelectorAll('section');
@@ -961,10 +1190,21 @@ let autoSaveTimer;
 function scheduleAutoSave() {
     clearTimeout(autoSaveTimer);
     autoSaveTimer = setTimeout(() => {
-        // Auto-save any unsaved changes
-        console.log('Auto-save triggered');
+        saveReminders();
+        saveExpenses();
+        saveNotes();
+        saveSteps();
+        saveBmiData();
+        saveNotifications();
+        console.log('✅ Auto-save completed');
     }, 30000); // 30 seconds
 }
+
+// Initialize notifications
+document.addEventListener('DOMContentLoaded', function() {
+    renderNotifications();
+    updateNotificationBadge();
+});
 
 // Service Worker registration for offline functionality
 if ('serviceWorker' in navigator) {
