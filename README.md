@@ -1,6 +1,6 @@
 # 🚀 DailyHelp – MicroTask Assistant
 
->> _Because life’s too short for messy to-do lists._
+> _Because life’s too short for messy to-do lists._
 
 DailyHelp is your **pocket-sized productivity buddy** 💼✨.  
 Whether it’s remembering to drink water, reply to that *“urgent”* email,  
@@ -50,6 +50,7 @@ Go ahead, fork it, remix it, and make it your own 🎨.
 ---
 
 > _“Small tasks done daily beat big plans left undone.”_ 💡
+
 
 
 
