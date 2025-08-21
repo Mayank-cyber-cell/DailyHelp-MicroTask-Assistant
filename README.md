@@ -1,4 +1,4 @@
-# 🚀 DailyHelp – MicroTask Assistant🌟
+# 🚀 DailyHelp – MicroTask Assistant
 
 > _Because life’s too short for messy to-do lists ._
 
@@ -50,6 +50,7 @@ Go ahead, fork it, remix it, and make it your own 🎨.
 ---
 
 > _“Small tasks done daily beat big plans left undone.”_ 💡
+
 
 
 
