@@ -1,4 +1,4 @@
-# 🚀 DailyHelp – MicroTask Assistant
+# 🚀 DailyHelp – MicroTask Assistants
 
 > _Because life’s too short for messy to-do lists ._
 
