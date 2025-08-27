@@ -17,7 +17,7 @@ or just reminding yourself to breathe—DailyHelp’s got your back.
 ---
 
 ## 🗂 Project Structure
-📂 DailyHelp-MicroTask-Assistant  
+📂 DailyHelp-MicroTask-Assistants  
  ├── index.html   # Main interface  
  ├── style.css    # Styles for that clean look  
  └── script.js    # Task logic  
@@ -50,6 +50,7 @@ Go ahead, fork it, remix it, and make it your own 🎨.
 ---
 
 > _“Small tasks done daily beat big plans left undone.”_ 💡
+
 
 
 
