@@ -55,8 +55,9 @@ This project is licensed under the **MIT License**.
 Go ahead, fork it, remix it, and make it your own 🎨.
 
 ---
-
+<p align="center"> <img src="https://media.giphy.com/media/26FPy3QZQqGtDcrja/giphy.gif" width="300" alt="Motivation"/> </p>
 > _“Small tasks done daily beat big plans left undone”_ 💡
+
 
 
 
