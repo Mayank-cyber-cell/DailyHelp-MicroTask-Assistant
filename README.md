@@ -36,7 +36,8 @@ or just reminding yourself to breathe—DailyHelp’s got your back.
    git clone https://github.com/Mayank-cyber-cell/DailyHelp-MicroTask-Assistant.git
    ```
 2. **Open `index.html`** in your browser  
-3. **Start adding tasks** like a productivity ninja 🥷  
+3. **Start adding tasks** like a productivity ninja 🥷
+<p align="center"> <img src="https://media.giphy.com/media/26AHONQ79FdWZhAI0/giphy.gif" width="350" alt="Ninja Productivity"/> </p>
 
 ---
 
@@ -56,6 +57,7 @@ Go ahead, fork it, remix it, and make it your own 🎨.
 ---
 
 > _“Small tasks done daily beat big plans left undone”_ 💡
+
 
 
 
