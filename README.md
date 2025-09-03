@@ -18,6 +18,9 @@ or just reminding yourself to breathe—DailyHelp’s got your back.
 ✅ **Clean UI** – Minimal clutter, maximum focus
 
 ---
+<p align="center">
+  <img src="https://media.giphy.com/media/xT9IgzoKnwFNmISR8I/giphy.gif" width="400" alt="Checklist Animation"/>
+</p>
 
 ## 🗂 Project Structure
 📂 DailyHelp-MicroTask-Assistants  
@@ -53,6 +56,7 @@ Go ahead, fork it, remix it, and make it your own 🎨.
 ---
 
 > _“Small tasks done daily beat big plans left undone”_ 💡
+
 
 
 
