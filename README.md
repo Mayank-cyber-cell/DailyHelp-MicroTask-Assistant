@@ -5,7 +5,7 @@
 
 > _Because life’s too short for messy to-do lists_
 
-DailyHelp is your **pocket-sized productivity buddy** 💼✨.  
+DailyHelp is your **pocket-sized productivity buddy** 💼✨  
 Whether it’s remembering to drink water, reply to that *“urgent”* email,  
 or just reminding yourself to breathe—DailyHelp’s got your back.
 
