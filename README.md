@@ -13,7 +13,7 @@ or just reminding yourself to breathe—DailyHelp’s got your back.
 
 ## ✨ Features That Make Life Easier
 ✅ **Quick & Simple** – Add tasks in seconds, no confusing menus  
-✅ **Front-end Magic** – Runs in your browser, no install needed  
+✅ **Front-end Magic** – Runs in your browser, no installation needed  
 ✅ **Lightweight & Fast** – Because speed matters  
 ✅ **Clean UI** – Minimal clutter, maximum focus
 
