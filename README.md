@@ -3,7 +3,7 @@
   <img src="https://media.giphy.com/media/3o7abldj0b3rxrZUxW/giphy.gif" width="200" alt="Productivity GIF"/>
 </p>
 
-> _Because life’s too short for messy to-do lists_
+> _Because life is too short for messy to-do lists_
 
 DailyHelp is your **pocket-sized productivity buddy** 💼✨  
 Whether it’s remembering to drink water, reply to that *“urgent”* email,  
